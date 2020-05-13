@@ -1,0 +1,13 @@
+spring:
+  main:
+    banner-mode: off
+
+logging:
+  config: classpath:log4j2.xml
+  level:
+    root: INFO
+    org:
+      apache:
+        catalina: WARN
+        coyote: WARN
+      springframework: WARN
