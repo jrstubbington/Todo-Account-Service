@@ -1,0 +1,90 @@
+DROP TABLE IF EXISTS `logins`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `memberships`;
+DROP TABLE IF EXISTS `roles`;
+DROP TABLE IF EXISTS `statuses`;
+DROP TABLE IF EXISTS `account_types`;
+DROP TABLE IF EXISTS `accounts`;
+
+--CREATE TABLE roles (
+--    ID bigint(20) NOT NULL AUTO_INCREMENT,
+--    NAME varchar(50) NOT NULL,
+--    DESCRIPTION varchar(255),
+--    PRIMARY KEY (ID),
+--    UNIQUE KEY UK_name (NAME)
+--) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--CREATE TABLE statuses (
+--    ID bigint(20) NOT NULL AUTO_INCREMENT,
+--    NAME varchar(50) NOT NULL,
+----    DESCRIPTION varchar(255),
+--    PRIMARY KEY (ID),
+--    UNIQUE KEY UK_name (NAME)
+--) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+--
+--CREATE TABLE account_types (
+--    ID bigint(20) NOT NULL AUTO_INCREMENT,
+--    NAME varchar(50) NOT NULL,
+--    DESCRIPTION varchar(255),
+--    PRIMARY KEY (ID),
+--    UNIQUE KEY UK_name (NAME)
+--) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE users (
+    ID bigint(20) NOT NULL AUTO_INCREMENT,
+    UUID binary(16) NOT NULL,
+    STATUS varchar(10) NOT NULL,
+    FIRST_NAME varchar(50) NOT NULL,
+    LAST_NAME varchar(50) NOT NULL,
+    EMAIL varchar(100) NOT NULL,
+    DATE_CREATED timestamp(0) DEFAULT NOW(0),
+    PRIMARY KEY (ID),
+    UNIQUE KEY UK_uuid (UUID),
+    UNIQUE KEY UK_email (EMAIL)
+) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+
+CREATE TABLE logins (
+    ID bigint(20) NOT NULL AUTO_INCREMENT,
+    USERNAME varchar(100) NOT NULL,
+    PASSWORD_HASH varchar(255) NOT NULL,
+    USER_ID bigint(20) NOT NULL,
+    LAST_SUCCESSFUL_LOGIN timestamp(3) NULL DEFAULT NULL,
+    LAST_FAILED_LOGIN timestamp(3) NULL DEFAULT NULL,
+    PRIMARY KEY (ID),
+    UNIQUE KEY UK_username (USERNAME),
+    UNIQUE KEY UK_user_id (USER_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+    --USER_ID bigint(20) NOT NULL,
+
+CREATE TABLE memberships (
+    ID bigint(20) NOT NULL AUTO_INCREMENT,
+    USER_ID bigint(20) NOT NULL,
+    ACCOUNT_ID bigint(20) NOT NULL,
+    ROLE_ID bigint(20) NOT NULL,
+    DATE_CREATED timestamp(3) DEFAULT NOW(3),
+    PRIMARY KEY (ID),
+    UNIQUE KEY UK_membership (USER_ID, ACCOUNT_ID, ROLE_ID)
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE accounts (
+    ID bigint(20) NOT NULL AUTO_INCREMENT,
+    UUID binary(16) NOT NULL,
+    NAME varchar(50) NOT NULL,
+    STATUS varchar(10) NOT NULL,
+    ACCOUNT_TYPE bigint(20) NOT NULL,
+    DATE_CREATED timestamp(3) DEFAULT NOW(3),
+    PRIMARY KEY (ID),
+    UNIQUE KEY UK_name (NAME),
+    UNIQUE KEY UK_uuid (UUID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE logins ADD FOREIGN KEY (USER_ID) REFERENCES users(ID);
+ALTER TABLE memberships ADD FOREIGN KEY (USER_ID) REFERENCES users(ID);
+--ALTER TABLE memberships ADD FOREIGN KEY (RELATED_ACCOUNT_ID) REFERENCES accounts(ID);
+--ALTER TABLE memberships ADD FOREIGN KEY (RELATED_ROLE_ID) REFERENCES roles(ID);
+--ALTER TABLE users ADD FOREIGN KEY (STATUS) REFERENCES statuses(ID);
+--ALTER TABLE accounts ADD FOREIGN KEY (STATUS) REFERENCES statuses(ID);
+--ALTER TABLE accounts ADD FOREIGN KEY (TYPE) REFERENCES account_types(ID);
+
+--INSERT INTO statuses (name) VALUES ('ACTIVE'), ('SUSPENDED'), ('DELETED');
