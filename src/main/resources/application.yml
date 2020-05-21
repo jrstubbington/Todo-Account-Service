@@ -23,6 +23,16 @@ spring:
         # Hibernate ddl auto (create, create-drop, validate, update)
         ddl-auto: validate
 
+server:
+  shutdown: graceful
+
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    doc-expansion: none
+    operationsSorter: method
+    tagsSorter: alpha
+
 management:
   endpoints:
     web:
@@ -35,8 +45,9 @@ flyway:
 logging:
   config: classpath:log4j2.xml
   level:
-    root: INFO
+    root: ERROR
     org:
+      example: TRACE
       apache:
         catalina: WARN
         coyote: WARN

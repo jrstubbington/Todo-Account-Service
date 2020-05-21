@@ -1,4 +1,4 @@
-package org.example.todo.accounts;
+package org.example.todo.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.ToString;
-import org.example.todo.memberships.Membership;
-import org.example.todo.status.Status;
+import org.example.todo.util.Status;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
@@ -19,23 +19,25 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "workspaces")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Account {
+public class Workspace implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Type(type="uuid-binary")
+	@NaturalId
 	@Column(name = "UUID", nullable = false, updatable = false)
 	@GeneratedValue(generator = "hibernate-uuid")
 	@Builder.Default
@@ -47,7 +49,7 @@ public class Account {
 	@NotNull
 	private Status status;
 
-	private int accountType;
+	private int workspaceType;
 
 	private OffsetDateTime dateCreated;
 
@@ -55,5 +57,5 @@ public class Account {
 	@OneToMany(mappedBy = "account")
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	private Set<Membership> memberships;
+	private transient Set<Membership> memberships;
 }

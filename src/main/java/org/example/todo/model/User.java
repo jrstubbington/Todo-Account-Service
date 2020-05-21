@@ -1,4 +1,4 @@
-package org.example.todo.user;
+package org.example.todo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -8,9 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Generated;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.example.todo.logins.Login;
-import org.example.todo.memberships.Membership;
-import org.example.todo.status.Status;
+import org.example.todo.util.Status;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -30,6 +29,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -40,13 +40,14 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Type(type="uuid-binary")
+	@NaturalId
 	@Column(name = "UUID", nullable = false, updatable = false)
 	@GeneratedValue(generator = "hibernate-uuid")
 	private final UUID uuid = UUID.randomUUID();
@@ -86,22 +87,4 @@ public class User {
 	@EqualsAndHashCode.Exclude
 	@JsonIgnore
 	private Login login;
-
-	/*@PrePersist
-	protected void prePersist() {
-		if (this.dateCreated == null) {
-			dateCreated = OffsetDateTime.now(ZoneOffset.UTC);
-		}
-		//if (this.dataChangeLastModifiedTime == null) dataChangeLastModifiedTime = new Date();
-	}
-
-	@PreUpdate
-	protected void preUpdate() {
-		this.dataChangeLastModifiedTime = new Date();
-	}
-
-	@PreRemove
-	protected void preRemove() {
-		this.dataChangeLastModifiedTime = new Date();
-	}*/
 }
