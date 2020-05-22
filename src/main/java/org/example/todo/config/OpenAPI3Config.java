@@ -5,13 +5,21 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import org.springdoc.core.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenAPI3Config {
 
-	private static final String PACKAGE_NAME = "org.example";
+	private final String packageName;
+
+	@Autowired
+	public OpenAPI3Config(@Value("${project.package}") String packageName){
+		this.packageName = packageName;
+	}
+
 
 	@Bean
 	public OpenAPI customOpenAPI() {
@@ -26,7 +34,7 @@ public class OpenAPI3Config {
 		return GroupedOpenApi.builder()
 				.setGroup("Other")
 				.pathsToMatch("/**")
-				.packagesToExclude(PACKAGE_NAME)
+				.packagesToExclude(packageName)
 				.build();
 	}
 
@@ -35,7 +43,7 @@ public class OpenAPI3Config {
 		return GroupedOpenApi.builder()
 				.setGroup("Version 1")
 				.pathsToMatch("/**/v1/**")
-				.packagesToScan(PACKAGE_NAME)
+				.packagesToScan(packageName)
 				.addOpenApiCustomiser(openApi -> openApi.setInfo(openApi.getInfo().version("v1")))
 				.build();
 	}
@@ -45,7 +53,7 @@ public class OpenAPI3Config {
 		return GroupedOpenApi.builder()
 				.setGroup("Version 2")
 				.pathsToMatch("/**/v2/**")
-				.packagesToScan(PACKAGE_NAME)
+				.packagesToScan(packageName)
 				.addOpenApiCustomiser(openApi -> openApi.setInfo(openApi.getInfo().version("v2")))
 				.build();
 	}

@@ -35,7 +35,7 @@ public class Login implements Serializable {
 
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_uuid", nullable = false)
 	@ToString.Exclude
 	private User user;
 

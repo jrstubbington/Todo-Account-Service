@@ -52,3 +52,6 @@ logging:
         catalina: WARN
         coyote: WARN
       springframework: WARN
+
+project:
+  package: ^project.groupId^
