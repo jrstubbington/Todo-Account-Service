@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>org.example</groupId>
-    <artifactId>UsersService</artifactId>
+    <artifactId>AccountService</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>

@@ -54,7 +54,7 @@ public class Workspace implements Serializable {
 	private OffsetDateTime dateCreated;
 
 	@Singular
-	@OneToMany(mappedBy = "account")
+	@OneToMany(mappedBy = "workspace")
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	private transient Set<Membership> memberships;

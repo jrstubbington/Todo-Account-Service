@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.todo.dto.UserDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
+import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
 import org.example.todo.model.Workspace;
+import org.example.todo.repository.LoginRepository;
+import org.example.todo.repository.MembershipRepository;
 import org.example.todo.repository.UserRepository;
 import org.example.todo.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +31,12 @@ public class UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private LoginRepository loginRepository;
+
+	@Autowired
+	private MembershipRepository membershipRepository;
 
 	public Page<User> getAllUsers(PageRequest pageRequest) {
 		try {
@@ -88,7 +98,35 @@ public class UserService {
 			return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
 		}
 		catch (Exception e) {
-			log.error("{}", e);
+			log.error("Error", e);
+			throw e;
+		}
+	}
+
+	@Transactional
+	public void deleteUser(UUID uuid) throws ResourceNotFoundException {
+		try {
+			User user = findUserByUuid(uuid);
+			user.setStatus(Status.DELETED);
+			Login login = user.getLogin();
+			Set<Membership> memberships = user.getMemberships();
+			log.debug("LOGIN: {}", login);
+			//TODO: delete login object via login service?
+			loginRepository.delete(login);
+			//TODO: delete memeberships via memebership service?
+			membershipRepository.deleteAll(memberships);
+
+			user.setLogin(null);
+			user.setMemberships(new HashSet<>());
+
+			userRepository.save(user);
+		}
+		catch (ResourceNotFoundException e) {
+			log.error("Unable to find user with id: {}", uuid);
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("Unknown error has occurred", e);
 			throw e;
 		}
 	}
