@@ -18,7 +18,6 @@ personally-identifying information, but retaining database primary keys for serv
     - [Additional Features](#additional-features)
 - [Versioning](#versioning)
 - [License](#license)
-- [Links](#links)
  
 
 ## Getting Started
@@ -50,9 +49,9 @@ _**Coming soon**_
 
 ## Built With
 
-* [Spring Boot 2.3.0](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
+* [Spring Boot 2.3.0](https://spring.io/projects/spring-boot) - The web framework used
 * [Maven](https://maven.apache.org/) - Dependency Management
-* [Lombok](https://rometools.github.io/rome/) - Used to generate java boilerplate code
+* [Lombok](https://projectlombok.org/) - Used to generate java boilerplate code
 * [Springdoc Swagger](https://springdoc.org/) - REST API Documentation
 * [Model Mapper](http://modelmapper.org/) - Automatic DTO (Data Transfer Object) mapping
 * [Flyway](https://flywaydb.org/) - Database Schema Versioning and Updates
@@ -60,8 +59,8 @@ _**Coming soon**_
 ### Additional Features
 * Spring Data JPA
 * Spring Data Kafka
-* Log4j2/SLF4J
 * Spring AOP (Aspect Oriented Programming)
+* Log4j2/SLF4J
 * Flyway
 
 ## Versioning
@@ -72,8 +71,8 @@ This project uses [SemVer](http://semver.org/) for versioning. For the versions 
 
 * **James Stubbington** - *Initial work* - [jrstubbington](https://github.com/jrstubbington)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/jrstubbington/Todo-Account-Service/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
