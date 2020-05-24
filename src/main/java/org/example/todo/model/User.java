@@ -52,20 +52,6 @@ public class User implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
-/*	@NotBlank
-	@Size(max = 50)
-	private  String firstName;
-
-	@NotBlank
-	@Size(max = 50)
-	private String lastName;
-
-	@NotNull
-	@Size(max = 100)
-	@Column(unique = true)
-	@Email
-	private String email;*/
-
 	@OneToOne(fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "profile_id", referencedColumnName = "id")

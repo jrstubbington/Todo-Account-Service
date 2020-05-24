@@ -8,14 +8,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+//Suppressing warning for Sonarqube function naming convention as JPA defines rules that don't comply
+@SuppressWarnings("squid:S00100")
 public interface UserRepository extends JpaRepository<User, Long> {
-//
-//	List<User> findByLastName(String lastName);
-//
-//	List<User> findByFirstNameLike(String firstName);
-
 	List<User> findByUserProfile_LastName(String lastName);
-
 
 	User findById(long id);
 

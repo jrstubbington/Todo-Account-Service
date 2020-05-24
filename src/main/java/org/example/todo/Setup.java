@@ -186,7 +186,7 @@ public class Setup {
 		// fetch customers by last name
 		log.info("User found with findByLastName('Doe'):");
 		log.info("--------------------------------------------");
-		userRepository.findByUserProfile_LastName("Doe").forEach(user -> log.info(user.toString()));
+		userRepository.findByUserProfile_LastName(lastName).forEach(user -> log.info(user.toString()));
 		log.info("");
 	}
 }
