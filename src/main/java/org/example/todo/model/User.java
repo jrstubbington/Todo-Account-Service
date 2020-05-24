@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.example.todo.util.Status;
@@ -22,13 +21,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -40,6 +36,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class User implements Serializable {
 
 	@Id
@@ -55,7 +52,7 @@ public class User implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
-	@NotBlank
+/*	@NotBlank
 	@Size(max = 50)
 	private  String firstName;
 
@@ -67,7 +64,14 @@ public class User implements Serializable {
 	@Size(max = 100)
 	@Column(unique = true)
 	@Email
-	private String email;
+	private String email;*/
+
+	@OneToOne(fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "profile_id", referencedColumnName = "id")
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private UserProfile userProfile;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL)
@@ -77,12 +81,12 @@ public class User implements Serializable {
 	private Set<Membership> memberships;
 
 	@Column
-	@Generated
 	@CreatedDate
 	private OffsetDateTime dateCreated;
 
-	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY,
+	@OneToOne(fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "login_id", referencedColumnName = "id")
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@JsonIgnore

@@ -2,13 +2,13 @@ package org.example.todo.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.todo.dto.UserDto;
+import org.example.todo.dto.UserProfileDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
-import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
+import org.example.todo.model.UserProfile;
 import org.example.todo.model.Workspace;
-import org.example.todo.repository.LoginRepository;
 import org.example.todo.repository.MembershipRepository;
 import org.example.todo.repository.UserRepository;
 import org.example.todo.util.Status;
@@ -33,9 +33,6 @@ public class UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private LoginRepository loginRepository;
-
-	@Autowired
 	private MembershipRepository membershipRepository;
 
 	public Page<User> getAllUsers(PageRequest pageRequest) {
@@ -43,7 +40,7 @@ public class UserService {
 			return userRepository.findAll(pageRequest);
 		}
 		catch (Exception e) {
-			log.error("{}", e);
+			log.error("", e);
 			throw e;
 		}
 	}
@@ -71,9 +68,14 @@ public class UserService {
 			// User is being updated
 			log.debug("Updating User {}", userUpdate);
 			User user = findUserByUuid(userUpdate.getUuid());
-			user.setFirstName(userUpdate.getFirstName());
-			user.setLastName(userUpdate.getLastName());
-			user.setEmail(userUpdate.getEmail());
+			UserProfile userProfile = user.getUserProfile();
+
+			UserProfileDto updateProfile = userUpdate.getUserProfile();
+
+			userProfile.setFirstName(updateProfile.getFirstName());
+			userProfile.setLastName(updateProfile.getLastName());
+			userProfile.setEmail(updateProfile.getEmail());
+
 			user.setStatus(userUpdate.getStatus());
 			return userRepository.save(user);
 		}
@@ -94,7 +96,6 @@ public class UserService {
 		try {
 			User user = findUserByUuid(uuid);
 			Set<Membership> memberships = user.getMemberships();
-			log.trace("MEMSHIPS: {}", memberships);
 			return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
 		}
 		catch (Exception e) {
@@ -108,16 +109,13 @@ public class UserService {
 		try {
 			User user = findUserByUuid(uuid);
 			user.setStatus(Status.DELETED);
-			Login login = user.getLogin();
+
 			Set<Membership> memberships = user.getMemberships();
-			log.debug("LOGIN: {}", login);
-			//TODO: delete login object via login service?
-			loginRepository.delete(login);
-			//TODO: delete memeberships via memebership service?
 			membershipRepository.deleteAll(memberships);
 
 			user.setLogin(null);
 			user.setMemberships(new HashSet<>());
+			user.setUserProfile(null);
 
 			userRepository.save(user);
 		}

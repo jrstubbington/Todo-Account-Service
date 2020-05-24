@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,11 +61,18 @@ public class UserController {
 			@ApiResponse(responseCode = "500", description = "Internal error has occurred", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
 	@GetMapping(value = "/", produces={"application/json"})
+	@Transactional
 	public ResponseEntity<ResponseContainer<UserDto>> getUsersV1(
 			@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
-		ResponseContainer<UserDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(userService.getAllUsers(PageRequest.of(page, pageSize)), UserDto.class);
-		return ResponseEntity.ok(responseContainer);
+		try {
+			ResponseContainer<UserDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(userService.getAllUsers(PageRequest.of(page, pageSize)), UserDto.class);
+			return ResponseEntity.ok(responseContainer);
+		}
+		catch (Exception e) {
+			log.error("Error", e);
+			throw e;
+		}
 	}
 
 	@Operation(summary = "Get a specific user's information")

@@ -9,10 +9,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+//
+//	List<User> findByLastName(String lastName);
+//
+//	List<User> findByFirstNameLike(String firstName);
 
-	List<User> findByLastName(String lastName);
+	List<User> findByUserProfile_LastName(String lastName);
 
-	List<User> findByFirstNameLike(String firstName);
 
 	User findById(long id);
 

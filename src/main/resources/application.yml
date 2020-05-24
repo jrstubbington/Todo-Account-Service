@@ -1,7 +1,10 @@
 spring:
   main:
     banner-mode: off
-#  http:
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  #  http:
 #    converters:
 #      preferred-json-mapper: gson
 
@@ -13,15 +16,16 @@ spring:
 
   jpa:
     show-sql: false
-    generate-ddl: false
+    generate-ddl: true
     properties:
       ## Hibernate Properties
       hibernate:
+        enable_lazy_load_no_trans: false
         format_sql: true
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
         ## This is important
         # Hibernate ddl auto (create, create-drop, validate, update)
-        ddl-auto: validate
+        ddl-auto: create
 
 server:
   shutdown: graceful

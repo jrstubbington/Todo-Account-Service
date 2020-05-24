@@ -1,5 +1,6 @@
 package org.example.todo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,12 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -31,13 +29,9 @@ public class Login implements Serializable {
 
 	private String username;
 
-	private String passwordHash;
-
-
-	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "user_uuid", nullable = false)
+	@JsonIgnore
 	@ToString.Exclude
-	private User user;
+	private String passwordHash;
 
 	private OffsetDateTime lastSuccessfulLogin;
 

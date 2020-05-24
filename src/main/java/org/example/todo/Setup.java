@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
+import org.example.todo.model.UserProfile;
 import org.example.todo.model.Workspace;
 import org.example.todo.repository.UserRepository;
 import org.example.todo.repository.WorkspaceRepository;
@@ -15,9 +16,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,7 +36,11 @@ public class Setup {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	private UserRepository userRepository;
+
 	@Bean
+	@Transactional
 	public CommandLineRunner demo(UserRepository repository, WorkspaceRepository workspaceRepository) {
 		return args -> {
 
@@ -52,15 +59,18 @@ public class Setup {
 						.build();
 
 				User user = User.builder()
-						.firstName("John")
-						.lastName("Doe")
-						.email("jdoe@gmail.com")
 						.status(Status.ACTIVE)
 						.build();
 
+				UserProfile userProfile = UserProfile.builder()
+						.firstName("John")
+						.lastName("Doe")
+						.email("jdoe@gmail.com")
+						.build();
+
 				Login login = Login.builder()
-						.username(user.getFirstName().substring(0,1)
-								.concat(user.getLastName())
+						.username(userProfile.getFirstName().substring(0,1)
+								.concat(userProfile.getLastName())
 								.toLowerCase())
 						.passwordHash(passwordEncoder.encode("test"))
 						.build();
@@ -79,29 +89,35 @@ public class Setup {
 				workspace.setMemberships(memberships);
 				user.setMemberships(memberships);
 				user.setLogin(login);
-				login.setUser(user);
+				user.setUserProfile(userProfile);
 
 				for (Membership memship : memberships) {
 					memship.setWorkspace(workspace);
 					memship.setUser(user);
 				}
 
-
 				workspaceRepository.save(workspace);
-				repository.save(user);
+				repository.saveAndFlush(user);
+
+
 
 
 				repository.save(User.builder()
-						.firstName("Chloe")
-						.lastName("O'Brian")
-						.email("test@gmail.com")
 						.status(Status.ACTIVE)
+						.userProfile(UserProfile.builder()
+								.firstName("Chloe")
+								.lastName("O'Brian")
+								.email("test@gmail.com")
+								.build())
 						.build());
+
 				repository.save(User.builder()
-						.firstName("Kim")
-						.lastName("Bauer")
-						.email("test1@gmail.com")
 						.status(Status.ACTIVE)
+						.userProfile(UserProfile.builder()
+								.firstName("Kim")
+								.lastName("Bauer")
+								.email("test1@gmail.com")
+								.build())
 						.build());
 
 				Login login2 = Login.builder()
@@ -109,33 +125,45 @@ public class Setup {
 						.passwordHash(passwordEncoder.encode("test"))
 						.build();
 
-				User user2 = User.builder()
+				UserProfile userProfile2 = UserProfile.builder()
 						.firstName("David")
 						.lastName("Palmer")
 						.email("test2@gmail.com")
+						.build();
+
+
+
+				User user2 = User.builder()
+						.userProfile(userProfile2)
 						.status(Status.ACTIVE)
 						.login(login2)
 						.build();
 
-				login2.setUser(user2);
 				repository.save(user2);
+
 				repository.save(User.builder()
-						.firstName("Michelle")
-						.lastName("Dessler")
-						.email("test3@gmail.com")
 						.status(Status.ACTIVE)
+						.userProfile(UserProfile.builder()
+								.firstName("Michelle")
+								.lastName("Dessler")
+								.email("test3@gmail.com")
+								.build())
 						.build());
 			}
 			catch (DataIntegrityViolationException e) {
 				log.error("Failed to add duplicate data");
+				throw e;
 			}
 			catch (Exception e) {
 				log.error("Failed to fully add test data.", e);
+				throw e;
 			}
 
 			// fetch all customers
 			log.info("Users found with findAll():");
 			log.info("-------------------------------");
+			List<User> users = repository.findAll();
+			log.debug("{}", users);
 			for (User customer : repository.findAll()) {
 				log.info(customer.toString());
 			}
@@ -149,16 +177,16 @@ public class Setup {
 				log.info(customer.toString());
 				log.info("");
 			}
+			findByLastName("Doe");
 
-			// fetch customers by last name
-			log.info("User found with findByLastName('Doe'):");
-			log.info("--------------------------------------------");
-			repository.findByLastName("Doe").forEach(bauer -> {
-				log.info(bauer.toString());
-				bauer.setStatus(Status.DELETED);
-				repository.save(bauer);
-			});
-			log.info("");
 		};
+	}
+
+	public void findByLastName(String lastName) {
+		// fetch customers by last name
+		log.info("User found with findByLastName('Doe'):");
+		log.info("--------------------------------------------");
+		userRepository.findByUserProfile_LastName("Doe").forEach(user -> log.info(user.toString()));
+		log.info("");
 	}
 }
