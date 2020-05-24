@@ -37,6 +37,11 @@ Lombok IDE Plugin
 
 Clone the repository locally, build and run via IDE Tools or build to JAR artifact and run via command line.
 
+Additionally, supply the application with database information via command line arguments:
+```
+    spring.datasource.url=jdbc:mysql://{YOUR_DB_INSTANCE}:3306/{YOUR_SCHEMA}?useSSL=false;spring.datasource.username={APP_NAME};spring.datasource.password={APP_PASSWORD}
+```
+
 Access server on http://localhost:8080
 
 ## Running the tests
@@ -62,6 +67,15 @@ _**Coming soon**_
 * Spring AOP (Aspect Oriented Programming)
 * Log4j2/SLF4J
 * Flyway
+
+### External Tools
+
+List of tools that were used in development but not directly tied to the project 
+
+* [Sonarqube](https://www.sonarqube.org/) - Code quality server
+* [Sonarlint](https://www.sonarlint.org/) - Code quality linting tool
+* [Nexus Repository](https://www.sonatype.com/nexus-repository-oss) - Shared artifacts repository
+* [Jenkins](https://www.jenkins.io/) - Automated build and testing
 
 ## Versioning
 
