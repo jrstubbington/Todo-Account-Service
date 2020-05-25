@@ -66,7 +66,7 @@ public class UserController {
 			@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
 			@RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 		try {
-			ResponseContainer<UserDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(userService.getAllUsers(PageRequest.of(page, pageSize)), UserDto.class);
+			ResponseContainer<UserDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(userService.getAllUsersPaged(PageRequest.of(page, pageSize)), UserDto.class);
 			return ResponseEntity.ok(responseContainer);
 		}
 		catch (Exception e) {

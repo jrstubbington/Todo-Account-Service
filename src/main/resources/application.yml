@@ -44,6 +44,7 @@ management:
         include: "*"
 
 flyway:
+  enabled: true
   baselineOnMigrate: false
 
 logging:

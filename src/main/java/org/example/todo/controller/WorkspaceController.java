@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/workspaces")
+@RequestMapping("/v1/workspaces")
 @Tag(name = "Workspace Management", description = "A collection of APIs designed to handle functions related to workspace management")
 @Validated
 public class WorkspaceController {
@@ -34,7 +34,7 @@ public class WorkspaceController {
 			@ApiResponse(responseCode = "200", description = "OK"),
 			@ApiResponse(responseCode = "500", description = "Internal error has occurred", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
-	@GetMapping(value = "/v1", produces={"application/json"})
+	@GetMapping(value = "/", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<WorkspaceDto>> getWorkspacesV1(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page, @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 		ResponseContainer<WorkspaceDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(workspaceService.getAllWorkspaces(PageRequest.of(page, pageSize)), WorkspaceDto.class);
 		return ResponseEntity.ok(responseContainer);

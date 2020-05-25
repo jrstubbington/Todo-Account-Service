@@ -44,6 +44,8 @@ Additionally, supply the application with database information via command line 
 
 Access server on http://localhost:8080
 
+Access API Documentation at http://localhost:8080/swagger-ui.html
+
 ## Running the tests
 
 _**Coming soon**_

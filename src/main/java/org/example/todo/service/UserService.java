@@ -29,13 +29,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
 	private MembershipRepository membershipRepository;
 
-	public Page<User> getAllUsers(PageRequest pageRequest) {
+	public List<User> getAllUsers() {
+		try {
+			return userRepository.findAll();
+		}
+		catch (Exception e) {
+			log.error("", e);
+			throw e;
+		}
+	}
+
+	public Page<User> getAllUsersPaged(PageRequest pageRequest) {
 		try {
 			return userRepository.findAll(pageRequest);
 		}
@@ -85,13 +93,6 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public Set<Workspace> getAllWorkspacesForUser(UserDto userDto) throws ResourceNotFoundException {
-		User user = findUserByUuid(userDto.getUuid());
-		Set<Membership> memberships = user.getMemberships();
-		return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
-	}
-
-	@Transactional(readOnly = true)
 	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) throws ResourceNotFoundException {
 		try {
 			User user = findUserByUuid(uuid);
@@ -127,5 +128,15 @@ public class UserService {
 			log.error("Unknown error has occurred", e);
 			throw e;
 		}
+	}
+
+	@Autowired
+	public void setUserRepository(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+
+	@Autowired
+	public void setMembershipRepository(MembershipRepository membershipRepository) {
+		this.membershipRepository = membershipRepository;
 	}
 }
