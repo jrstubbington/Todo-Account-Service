@@ -2,6 +2,7 @@ package org.example.todo.service;
 
 import org.example.todo.dto.UserDto;
 import org.example.todo.dto.UserProfileDto;
+import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
 import org.example.todo.model.Membership;
@@ -20,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +45,7 @@ class UserServiceTest {
 	private Page<User> page;
 
 	@Mock
-	private List<User> userList;
+	private List<User> mockedUserList;
 
 	@Mock
 	private User user;
@@ -58,9 +61,9 @@ class UserServiceTest {
 
 	@Test
 	void getAllUsers() {
-		when(userList.get(0)).thenReturn(user);
+		when(mockedUserList.get(0)).thenReturn(user);
 
-		when(userRepository.findAll()).thenReturn(userList);
+		when(userRepository.findAll()).thenReturn(mockedUserList);
 		Assertions.assertEquals(user, userService.getAllUsers().get(0));
 	}
 
@@ -72,23 +75,24 @@ class UserServiceTest {
 	}
 
 	@Test
-	void getAllUsersPaged() {
+	void getAllUsersResponse() {
 		PageRequest pageable = PageRequest.of(0, 10);
 
+		List<User> userList = new ArrayList<>(Collections.singletonList(user));
 		when(page.getContent()).thenReturn(userList);
-		when(userList.get(0)).thenReturn(user);
+		when(page.getPageable()).thenReturn(pageable);
 
 		when(userRepository.findAll(isA(PageRequest.class))).thenReturn(page);
-		Assertions.assertEquals(user, userService.getAllUsersPaged(pageable).getContent().get(0));
+		Assertions.assertEquals(new UserDto(), userService.getAllUsersResponse(pageable).getData().get(0));
 	}
 
 	@Test
-	void getAllUsersPagedThrowsException() {
+	void getAllUsersResponseThrowsException() {
 		PageRequest pageable = PageRequest.of(0, 10);
 
 		when(userRepository.findAll(isA(PageRequest.class))).thenThrow(NullPointerException.class);
 
-		Assertions.assertThrows(NullPointerException.class, () -> userService.getAllUsersPaged(pageable));
+		Assertions.assertThrows(NullPointerException.class, () -> userService.getAllUsersResponse(pageable));
 	}
 
 	@Test
@@ -100,6 +104,15 @@ class UserServiceTest {
 	}
 
 	@Test
+	void findUserByUuidResponse() throws ResourceNotFoundException {
+		Optional<User> optionalUser = Optional.of(user);
+
+		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		Assertions.assertEquals(new UserDto(), userService.findUserByUuidResponse(UUID.randomUUID()).getData().get(0));
+	}
+
+
+	@Test
 	void findUserByUuidThrowsNotFoundException() {
 		Optional<User> optionalUser = Optional.empty();
 
@@ -107,13 +120,13 @@ class UserServiceTest {
 		Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.findUserByUuid(UUID.randomUUID()));
 	}
 
-	@Test
+/*	@Test
 	void findUsersByStatus() {
-		when(userRepository.findByStatus(isA(Status.class))).thenReturn(userList);
-		when(userList.get(0)).thenReturn(user);
+		when(userRepository.findByStatus(isA(Status.class))).thenReturn(mockedUserList);
+		when(mockedUserList.get(0)).thenReturn(user);
 
 		Assertions.assertEquals(user, userService.findUsersByStatus(Status.ACTIVE).get(0));
-	}
+	}*/
 
 	@Test
 	void createUser() {
@@ -171,6 +184,34 @@ class UserServiceTest {
 	}
 
 	@Test
+	void updateUserResponse() throws ResourceNotFoundException, ImproperResourceSpecification {
+		Optional<User> optionalUser = Optional.of(user);
+
+		UserDto userDto = new UserDto();
+		userDto.setUuid(UUID.randomUUID());
+
+		UserProfile userProfile = new UserProfile();
+		userProfile.setFirstName("Bob");
+		userProfile.setLastName("Smith");
+		userProfile.setEmail("bsmith@example.org");
+
+		//Generate input UserDto UserProfile
+		UserProfileDto updateProfile = new UserProfileDto();
+		updateProfile.setFirstName("Bob");
+		updateProfile.setLastName("Smith");
+		updateProfile.setEmail("bsmith@example.org");
+
+		//Set generated UserProfile in generated userDto
+		userDto.setUserProfile(updateProfile);
+
+		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		when(user.getUserProfile()).thenReturn(userProfile);
+		when(userRepository.save(isA(User.class))).thenReturn(user);
+
+		Assertions.assertEquals(updateProfile, userService.updateUserResponse(userDto).getData().get(0).getUserProfile());
+	}
+
+	@Test
 	void getAllWorkspacesForUserUuid() throws ResourceNotFoundException {
 
 		Workspace workspace = new Workspace();
@@ -201,7 +242,30 @@ class UserServiceTest {
 	}
 
 	@Test
-	void deleteUser() {
+	void getAllWorkspacesForUserUuidResponse() throws ResourceNotFoundException {
+		Workspace workspace = new Workspace();
+		workspace.setId(1L);
+
+		Membership membership = new Membership();
+		membership.setWorkspace(workspace);
+
+		Set<Membership> memberships = new HashSet<>();
+		memberships.add(membership);
+
+		Optional<User> optionalUser = Optional.of(user);
+		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		when(user.getMemberships()).thenReturn(memberships);
+
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+		workspaceDto.setUuid(workspace.getUuid());
+
+		List<WorkspaceDto> workspaceList = new ArrayList<>(Collections.singletonList(workspaceDto));
+
+		Assertions.assertEquals(workspaceList, userService.getAllWorkspacesForUserUuidResponse(UUID.randomUUID()).getData());
+	}
+
+	@Test
+	void deleteUser() throws ResourceNotFoundException {
 		Workspace workspace = new Workspace();
 		workspace.setId(1L);
 
@@ -210,11 +274,19 @@ class UserServiceTest {
 		Set<Membership> memberships = new HashSet<>();
 		memberships.add(membership);
 
+		User user = new User();
+		user.setStatus(Status.ACTIVE);
+		user.setMemberships(memberships);
+
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(user.getMemberships()).thenReturn(memberships);
+		when(userRepository.save(user)).thenReturn(user);
 
 		Assertions.assertDoesNotThrow(() -> userService.deleteUser(UUID.randomUUID()));
+		Assertions.assertEquals(Status.DELETED, userService.deleteUser(UUID.randomUUID()).getStatus());
+		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getLogin());
+		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getUserProfile());
+		Assertions.assertEquals(new HashSet<>(), userService.deleteUser(UUID.randomUUID()).getMemberships());
 	}
 
 	@Test
@@ -223,6 +295,15 @@ class UserServiceTest {
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
 		Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(UUID.randomUUID()));
+	}
+
+	@Test
+	void deleteUserResponse() throws ResourceNotFoundException {
+		Optional<User> optionalUser = Optional.of(user);
+		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		when(userRepository.save(isA(User.class))).thenReturn(user);
+
+		Assertions.assertNull(userService.deleteUserResponse(UUID.randomUUID()).getData().get(0).getUserProfile());
 	}
 
 	@Test

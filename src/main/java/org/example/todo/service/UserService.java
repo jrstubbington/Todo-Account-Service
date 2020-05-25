@@ -3,6 +3,7 @@ package org.example.todo.service;
 import lombok.extern.slf4j.Slf4j;
 import org.example.todo.dto.UserDto;
 import org.example.todo.dto.UserProfileDto;
+import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
 import org.example.todo.model.Membership;
@@ -11,13 +12,16 @@ import org.example.todo.model.UserProfile;
 import org.example.todo.model.Workspace;
 import org.example.todo.repository.MembershipRepository;
 import org.example.todo.repository.UserRepository;
+import org.example.todo.util.ResponseContainer;
+import org.example.todo.util.ResponseUtils;
 import org.example.todo.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -29,10 +33,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
+	//TODO: test for and catch exceptions related to malformed POST bodies as to not propogate the error message to the user
+
 	private UserRepository userRepository;
 
 	private MembershipRepository membershipRepository;
 
+	//TODO: Enable filtering and sorting
 	public List<User> getAllUsers() {
 		try {
 			return userRepository.findAll();
@@ -43,9 +50,10 @@ public class UserService {
 		}
 	}
 
-	public Page<User> getAllUsersPaged(PageRequest pageRequest) {
+	//TODO: Enable filtering and sorting
+	public ResponseContainer<UserDto> getAllUsersResponse(PageRequest pageRequest) {
 		try {
-			return userRepository.findAll(pageRequest);
+			return ResponseUtils.pageToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class);
 		}
 		catch (Exception e) {
 			log.error("", e);
@@ -57,14 +65,17 @@ public class UserService {
 		return userRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %s", uuid)));
 	}
 
-	public List<User> findUsersByStatus(Status status) {
-		return userRepository.findByStatus(status);
+	public ResponseContainer<UserDto> findUserByUuidResponse(UUID uuid) throws ResourceNotFoundException {
+		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(findUserByUuid(uuid)), UserDto.class);
 	}
+
+/*	public List<User> findUsersByStatus(Status status) {
+		return userRepository.findByStatus(status);
+	}*/
 
 	public User createUser(UserDto userCreate) throws ImproperResourceSpecification {
 		if (Objects.isNull(userCreate.getUuid())) {
 			throw new UnsupportedOperationException("Functionality to create new users has not been implemented");
-
 		}
 		else {
 			throw new ImproperResourceSpecification("Cannot specify UUID when creating a resource");
@@ -92,6 +103,10 @@ public class UserService {
 		}
 	}
 
+	public ResponseContainer<UserDto> updateUserResponse(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
+		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(updateUser(userUpdate)), UserDto.class);
+	}
+
 	@Transactional(readOnly = true)
 	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) throws ResourceNotFoundException {
 		try {
@@ -106,7 +121,12 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deleteUser(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainer<WorkspaceDto> getAllWorkspacesForUserUuidResponse(UUID uuid) throws ResourceNotFoundException {
+		return ResponseUtils.pageToDtoResponseContainer(new ArrayList<>(getAllWorkspacesForUserUuid(uuid)), WorkspaceDto.class);
+	}
+
+	@Transactional
+	public User deleteUser(UUID uuid) throws ResourceNotFoundException {
 		try {
 			User user = findUserByUuid(uuid);
 			user.setStatus(Status.DELETED);
@@ -118,7 +138,7 @@ public class UserService {
 			user.setMemberships(new HashSet<>());
 			user.setUserProfile(null);
 
-			userRepository.save(user);
+			return userRepository.save(user);
 		}
 		catch (ResourceNotFoundException e) {
 			log.error("Unable to find user with id: {}", uuid);
@@ -128,6 +148,11 @@ public class UserService {
 			log.error("Unknown error has occurred", e);
 			throw e;
 		}
+	}
+
+	@Transactional
+	public ResponseContainer<UserDto> deleteUserResponse(UUID uuid) throws ResourceNotFoundException {
+		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(deleteUser(uuid)), UserDto.class);
 	}
 
 	@Autowired
