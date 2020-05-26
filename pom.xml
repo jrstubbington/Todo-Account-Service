@@ -189,27 +189,34 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.3</version>
-                <executions>
+                <configuration>
+                    <excludes>
+                        <exclude>org/example/todo/Application.class</exclude>
+                        <exclude>org/example/todo/Setup.class</exclude>
+                        <exclude>org/example/todo/util/LoggingAspect.class</exclude>
+                        <exclude>org/example/todo/config/*</exclude>
+                        <exclude>org/example/todo/security/*</exclude>
+                    </excludes>
+                </configuration>
+               <executions>
                     <execution>
-                        <id>coverage-initialize</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>coverage-report</id>
-                        <phase>post-integration-test</phase>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>org.example.todo.Application.class</exclude>
-                                <exclude>org.example.todo.config.*</exclude>
-                                <exclude>org.example.todo.security.*</exclude>
-                                <exclude>org.example.todo.util.LoggingAspect.class</exclude>
-                            </excludes>
-                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
