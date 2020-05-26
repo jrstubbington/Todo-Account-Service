@@ -1,14 +1,17 @@
 package org.example.todo.exception;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 
 @Getter
+@EqualsAndHashCode
 @Slf4j
 public class ErrorDetails {
 
+	@EqualsAndHashCode.Exclude
 	private final OffsetDateTime timestamp;
 	private final String message;
 	private final String details;

@@ -29,6 +29,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -64,14 +66,14 @@ class UserServiceTest {
 		when(mockedUserList.get(0)).thenReturn(user);
 
 		when(userRepository.findAll()).thenReturn(mockedUserList);
-		Assertions.assertEquals(user, userService.getAllUsers().get(0));
+		assertEquals(user, userService.getAllUsers().get(0));
 	}
 
 	@Test
 	void getAllUsersThrowsException() {
 		when(userRepository.findAll()).thenThrow(NullPointerException.class);
 
-		Assertions.assertThrows(NullPointerException.class, () -> userService.getAllUsers());
+		assertThrows(NullPointerException.class, () -> userService.getAllUsers());
 	}
 
 	@Test
@@ -83,7 +85,7 @@ class UserServiceTest {
 		when(page.getPageable()).thenReturn(pageable);
 
 		when(userRepository.findAll(isA(PageRequest.class))).thenReturn(page);
-		Assertions.assertEquals(new UserDto(), userService.getAllUsersResponse(pageable).getData().get(0));
+		assertEquals(new UserDto(), userService.getAllUsersResponse(pageable).getData().get(0));
 	}
 
 	@Test
@@ -92,7 +94,7 @@ class UserServiceTest {
 
 		when(userRepository.findAll(isA(PageRequest.class))).thenThrow(NullPointerException.class);
 
-		Assertions.assertThrows(NullPointerException.class, () -> userService.getAllUsersResponse(pageable));
+		assertThrows(NullPointerException.class, () -> userService.getAllUsersResponse(pageable));
 	}
 
 	@Test
@@ -100,7 +102,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.of(user);
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		Assertions.assertEquals(user, userService.findUserByUuid(UUID.randomUUID()));
+		assertEquals(user, userService.findUserByUuid(UUID.randomUUID()));
 	}
 
 	@Test
@@ -108,7 +110,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.of(user);
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		Assertions.assertEquals(new UserDto(), userService.findUserByUuidResponse(UUID.randomUUID()).getData().get(0));
+		assertEquals(new UserDto(), userService.findUserByUuidResponse(UUID.randomUUID()).getData().get(0));
 	}
 
 
@@ -117,7 +119,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.empty();
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.findUserByUuid(UUID.randomUUID()));
+		assertThrows(ResourceNotFoundException.class, () -> userService.findUserByUuid(UUID.randomUUID()));
 	}
 
 /*	@Test
@@ -131,14 +133,42 @@ class UserServiceTest {
 	@Test
 	void createUser() {
 		UserDto userDto = new UserDto();
-		Assertions.assertThrows(UnsupportedOperationException.class, () -> userService.createUser(userDto));
+		assertThrows(UnsupportedOperationException.class, () -> userService.createUser(userDto));
 	}
 
 	@Test
 	void createUserThrowsImproperResourceSpecification() {
 		UserDto userDto = new UserDto();
 		userDto.setUuid(UUID.randomUUID());
-		Assertions.assertThrows(ImproperResourceSpecification.class, () -> userService.createUser(userDto));
+		assertThrows(ImproperResourceSpecification.class, () -> userService.createUser(userDto));
+	}
+
+	@Test
+	void createUserResponse() {
+		Optional<User> optionalUser = Optional.of(user);
+
+		UserDto userDto = new UserDto();
+
+		UserProfile userProfile = new UserProfile();
+		userProfile.setFirstName("Bob");
+		userProfile.setLastName("Smith");
+		userProfile.setEmail("bsmith@example.org");
+
+		//Generate input UserDto UserProfile
+		UserProfileDto updateProfile = new UserProfileDto();
+		updateProfile.setFirstName("Bob");
+		updateProfile.setLastName("Smith");
+		updateProfile.setEmail("bsmith@example.org");
+
+		//Set generated UserProfile in generated userDto
+		userDto.setUserProfile(updateProfile);
+
+/*		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		when(user.getUserProfile()).thenReturn(userProfile);
+		when(userRepository.save(isA(User.class))).thenReturn(user);*/
+
+//		assertEquals(updateProfile, userService.createUserResponse(userDto).getData().get(0).getUserProfile());
+		assertThrows(UnsupportedOperationException.class, () -> userService.createUserResponse(userDto));
 	}
 
 	@Test
@@ -168,7 +198,7 @@ class UserServiceTest {
 		when(userRepository.save(isA(User.class))).thenReturn(user);
 
 		User user = userService.updateUser(userDto);
-		Assertions.assertEquals(UserProfile.builder()
+		assertEquals(UserProfile.builder()
 				.firstName("Bob")
 				.lastName("Smith")
 				.email("bsmith@example.org")
@@ -180,7 +210,7 @@ class UserServiceTest {
 	@Test
 	void updateUserThrowsImproperResourceSpecification() {
 		UserDto userDto = new UserDto();
-		Assertions.assertThrows(ImproperResourceSpecification.class, () -> userService.updateUser(userDto));
+		assertThrows(ImproperResourceSpecification.class, () -> userService.updateUser(userDto));
 	}
 
 	@Test
@@ -208,7 +238,7 @@ class UserServiceTest {
 		when(user.getUserProfile()).thenReturn(userProfile);
 		when(userRepository.save(isA(User.class))).thenReturn(user);
 
-		Assertions.assertEquals(updateProfile, userService.updateUserResponse(userDto).getData().get(0).getUserProfile());
+		assertEquals(updateProfile, userService.updateUserResponse(userDto).getData().get(0).getUserProfile());
 	}
 
 	@Test
@@ -230,7 +260,7 @@ class UserServiceTest {
 		Set<Workspace> workspaces = new HashSet<>();
 		workspaces.add(workspace);
 
-		Assertions.assertEquals(workspaces, userService.getAllWorkspacesForUserUuid(UUID.randomUUID()));
+		assertEquals(workspaces, userService.getAllWorkspacesForUserUuid(UUID.randomUUID()));
 	}
 
 	@Test
@@ -238,7 +268,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.empty();
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.getAllWorkspacesForUserUuid(UUID.randomUUID()));
+		assertThrows(ResourceNotFoundException.class, () -> userService.getAllWorkspacesForUserUuid(UUID.randomUUID()));
 	}
 
 	@Test
@@ -261,7 +291,7 @@ class UserServiceTest {
 
 		List<WorkspaceDto> workspaceList = new ArrayList<>(Collections.singletonList(workspaceDto));
 
-		Assertions.assertEquals(workspaceList, userService.getAllWorkspacesForUserUuidResponse(UUID.randomUUID()).getData());
+		assertEquals(workspaceList, userService.getAllWorkspacesForUserUuidResponse(UUID.randomUUID()).getData());
 	}
 
 	@Test
@@ -283,10 +313,10 @@ class UserServiceTest {
 		when(userRepository.save(user)).thenReturn(user);
 
 		Assertions.assertDoesNotThrow(() -> userService.deleteUser(UUID.randomUUID()));
-		Assertions.assertEquals(Status.DELETED, userService.deleteUser(UUID.randomUUID()).getStatus());
+		assertEquals(Status.DELETED, userService.deleteUser(UUID.randomUUID()).getStatus());
 		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getLogin());
 		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getUserProfile());
-		Assertions.assertEquals(new HashSet<>(), userService.deleteUser(UUID.randomUUID()).getMemberships());
+		assertEquals(new HashSet<>(), userService.deleteUser(UUID.randomUUID()).getMemberships());
 	}
 
 	@Test
@@ -294,7 +324,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.empty();
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(UUID.randomUUID()));
+		assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(UUID.randomUUID()));
 	}
 
 	@Test
@@ -310,6 +340,6 @@ class UserServiceTest {
 	void deleteUserThrowsException() {
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenThrow(new NullPointerException());
-		Assertions.assertThrows(NullPointerException.class, () -> userService.deleteUser(UUID.randomUUID()));
+		assertThrows(NullPointerException.class, () -> userService.deleteUser(UUID.randomUUID()));
 	}
 }

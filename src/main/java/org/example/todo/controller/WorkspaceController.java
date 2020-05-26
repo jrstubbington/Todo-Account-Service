@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.todo.util.ResponseContainer;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ErrorDetails;
 import org.example.todo.service.WorkspaceService;
+import org.example.todo.util.ResponseContainer;
 import org.example.todo.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class WorkspaceController {
 
-	@Autowired
 	private WorkspaceService workspaceService;
 
 	@Operation(summary = "View a list of available workspaces")
@@ -38,5 +37,10 @@ public class WorkspaceController {
 	public ResponseEntity<ResponseContainer<WorkspaceDto>> getWorkspacesV1(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page, @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 		ResponseContainer<WorkspaceDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(workspaceService.getAllWorkspaces(PageRequest.of(page, pageSize)), WorkspaceDto.class);
 		return ResponseEntity.ok(responseContainer);
+	}
+
+	@Autowired
+	public void setWorkspaceService(WorkspaceService workspaceService) {
+		this.workspaceService = workspaceService;
 	}
 }

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-	//TODO: test for and catch exceptions related to malformed POST bodies as to not propogate the error message to the user
+	//TODO: test for and catch exceptions related to malformed POST bodies as to not propagate the error message to the user
 
 	private UserRepository userRepository;
 
@@ -80,6 +80,12 @@ public class UserService {
 		else {
 			throw new ImproperResourceSpecification("Cannot specify UUID when creating a resource");
 		}
+	}
+
+	public ResponseContainer<UserDto> createUserResponse(UserDto userCreate) {
+		throw new UnsupportedOperationException("Functionality to create new users has not been implemented");
+
+		//return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createUser(userCreate)), UserDto.class)
 	}
 
 	public User updateUser(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
@@ -154,6 +160,12 @@ public class UserService {
 	public ResponseContainer<UserDto> deleteUserResponse(UUID uuid) throws ResourceNotFoundException {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(deleteUser(uuid)), UserDto.class);
 	}
+
+/*	@Transactional
+	public ResponseContainer<UserDto> findByLastNameResponse(String lastName) {
+		// fetch customers by last name
+		return ResponseUtils.pageToDtoResponseContainer(userRepository.findByUserProfile_LastName(lastName), UserDto.class);
+	}*/
 
 	@Autowired
 	public void setUserRepository(UserRepository userRepository) {

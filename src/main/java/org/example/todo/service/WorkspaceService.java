@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class WorkspaceService {
 
-	@Autowired
 	private WorkspaceRepository workspaceRepository;
 
 	public Page<Workspace> getAllWorkspaces(PageRequest pageRequest) {
 		return workspaceRepository.findAll(pageRequest);
 	}
 
-
+	@Autowired
+	public void setWorkspaceRepository(WorkspaceRepository workspaceRepository) {
+		this.workspaceRepository = workspaceRepository;
+	}
 }

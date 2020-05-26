@@ -15,7 +15,6 @@ import org.example.todo.exception.ResourceNotFoundException;
 import org.example.todo.service.UserService;
 import org.example.todo.util.Create;
 import org.example.todo.util.ResponseContainer;
-import org.example.todo.util.ResponseUtils;
 import org.example.todo.util.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -37,8 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,7 +45,6 @@ import java.util.UUID;
 @Slf4j
 public class UserController {
 
-	@Autowired
 	private UserService userService;
 
 	@Operation(summary = "View a list of available users")
@@ -96,9 +92,9 @@ public class UserController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value = "/", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> createUser(
-			@Validated(Create.class) @RequestBody UserDto userDto) throws URISyntaxException, ImproperResourceSpecification {
-		List<UserDto> userDTOs = ResponseUtils.convertToDtoList(Collections.singletonList(userService.createUser(userDto)), UserDto.class);
-		return ResponseEntity.created(new URI("/users/id/" + userDTOs.get(0).getUuid())).body(new ResponseContainer<>(true, null, userDTOs));
+			@Validated(Create.class) @RequestBody UserDto userDto) throws URISyntaxException {
+		//TODO properly return URI of new resource to spec
+		return ResponseEntity.created(new URI("")).body(userService.createUserResponse(userDto));
 	}
 
 	@Operation(summary = "Get the specified user's available workspaces")
@@ -123,5 +119,15 @@ public class UserController {
 	public ResponseEntity<ResponseContainer<UserDto>> deleteUser(
 			@RequestParam(value = "Status to get user object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.deleteUserResponse(uuid));
+	}
+
+/*	@GetMapping(value = "/lastname/{lastname}", produces={"application/json"})
+	public ResponseEntity<ResponseContainer<UserDto>> getByLastName(@RequestParam(value = "Status to get user object with") @PathVariable String lastName) {
+		return ResponseEntity.ok(userService.findByLastNameResponse(lastName));
+	}*/
+
+	@Autowired
+	public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
 }
