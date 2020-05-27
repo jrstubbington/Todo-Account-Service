@@ -132,13 +132,59 @@ class UserServiceTest {
 		Assertions.assertEquals(user, userService.findUsersByStatus(Status.ACTIVE).get(0));
 	}*/
 
-//	@Test
-//	void createUser() {
-//		UserDto userDto = new UserDto();
-//		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
-//		accountCreationRequest.setUser(userDto);
-//		assertThrows(UnsupportedOperationException.class, () -> userService.createUser(accountCreationRequest));
-//	}
+	@Test
+	void testCreateUserWithNullUserDto() {
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
+		accountCreationRequest.setWorkspace(workspaceDto);
+
+		assertThrows(ImproperResourceSpecification.class, () -> userService.createUser(accountCreationRequest),
+				"Account Creation Request with no User specification should fail");
+	}
+
+	@Test
+	void testCreateUserWithNullWorkspaceDto() {
+		UserDto userDto = new UserDto();
+		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
+		accountCreationRequest.setUser(userDto);
+
+		assertThrows(ImproperResourceSpecification.class, () -> userService.createUser(accountCreationRequest),
+				"Account Creation Request with no Workspace specification should fail");
+	}
+
+	@Test
+	void testCreateUserWithNullLoginDto() {
+		UserDto userDto = new UserDto();
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
+		accountCreationRequest.setUser(userDto);
+		accountCreationRequest.setWorkspace(workspaceDto);
+
+		assertThrows(ImproperResourceSpecification.class, () -> userService.createUser(accountCreationRequest),
+				"Account Creation Request with no Login specification should fail");
+	}
+
+	@Test
+	void testCreateUserWithExistingUserAndWorkspace() throws ResourceNotFoundException {
+		UserDto userDto = new UserDto();
+		userDto.setUuid(UUID.randomUUID());
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+		workspaceDto.setUuid(UUID.randomUUID());
+		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
+		accountCreationRequest.setUser(userDto);
+		accountCreationRequest.setWorkspace(workspaceDto);
+
+		Workspace workspace = new Workspace();
+		workspace.setMemberships(new HashSet<>());
+
+		Optional<User> optionalUser = Optional.of(user);
+		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
+		when(workspaceService.findWorkspaceByUuid(isA(UUID.class))).thenReturn(workspace);
+		when(user.getMemberships()).thenReturn(new HashSet<>());
+
+		assertDoesNotThrow(() -> userService.createUser(accountCreationRequest),
+				"Account Creation request with existing user and workspace should not fail");
+	}
 
 	@Test
 	void testCreateUserThrowsImproperResourceSpecification() {
@@ -176,11 +222,11 @@ class UserServiceTest {
 		accountCreationRequest.setLogin(loginDto);
 		accountCreationRequest.setWorkspace(workspaceDto);
 
-		when(userRepository.save(isA(User.class))).thenReturn(user);
 
 		Workspace workspace = Workspace.builder().name("Workspace").status(Status.ACTIVE).memberships(new HashSet<>()).build();
 
 		when(workspaceService.createWorkspace(isA(WorkspaceDto.class))).thenReturn(workspace);
+		when(userRepository.save(isA(User.class))).thenReturn(user);
 
 		assertEquals(updateProfile, userService.createUserResponse(accountCreationRequest).getData().get(0).getUserProfile(),
 				"Returned user profile should match passed in object");

@@ -32,7 +32,7 @@ public class WorkspaceService {
 		return workspaceRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("Workspace not found with id: %s", uuid)));
 	}
 
-	public ResponseContainer<WorkspaceDto> findUserByUuidResponse(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainer<WorkspaceDto> findWorkspaceByUuidResponse(UUID uuid) throws ResourceNotFoundException {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(findWorkspaceByUuid(uuid)), WorkspaceDto.class);
 	}
 
