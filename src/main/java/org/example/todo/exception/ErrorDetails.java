@@ -7,7 +7,9 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -33,7 +35,8 @@ public class ErrorDetails {
 	public ErrorDetails(OffsetDateTime timestamp, String message, List<String> details, String requestInformation) {
 		this.timestamp = timestamp;
 		this.message = message;
-		this.details = details;
+		//Clone list to prevent mutable object edits
+		this.details = Objects.nonNull(details) ? new ArrayList<>(details) : null;
 		this.errorCode = "12345";
 		this.moreInfo = "http://ourDocumentationWebsite.org/docs/errors/12345";
 		this.requestInformation = requestInformation;

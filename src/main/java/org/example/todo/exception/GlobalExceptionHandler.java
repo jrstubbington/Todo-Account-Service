@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 		}
 		else {
 			log.error("Caught Unhandled Error {}, with root cause {}", e.getClass(), throwable.getClass(), e);
-			ErrorDetails errorDetails = new ErrorDetails(Instant.now().atOffset(ZoneOffset.UTC), e.getMessage(), null, request.getDescription(false));
+			ErrorDetails errorDetails = new ErrorDetails(Instant.now().atOffset(ZoneOffset.UTC), "An Internal Server error has occurred.", null, request.getDescription(false));
 			return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

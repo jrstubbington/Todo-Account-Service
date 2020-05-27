@@ -1,11 +1,11 @@
 package org.example.todo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 import lombok.ToString;
 import org.example.todo.util.Status;
 import org.hibernate.annotations.NaturalId;
@@ -53,9 +53,9 @@ public class Workspace implements Serializable {
 
 	private OffsetDateTime dateCreated;
 
-	@Singular
 	@OneToMany(mappedBy = "workspace")
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	private transient Set<Membership> memberships;
+	@JsonIgnore
+	private Set<Membership> memberships;
 }

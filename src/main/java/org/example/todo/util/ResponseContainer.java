@@ -2,6 +2,7 @@ package org.example.todo.util;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -22,7 +23,8 @@ public class ResponseContainer<T> {
 		this.statusDescription = statusDescription;
 		this.size = data.size();
 		this.type = !data.isEmpty() ? data.get(0).getClass().getName(): null;
-		this.data = data;
+		//Clone the object to prevent mutable object issues
+		this.data = new ArrayList<>(data);
 		this.totalElements = this.size;
 	}
 }

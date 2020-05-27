@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.example.todo.dto.AccountCreationRequest;
 import org.example.todo.dto.UserDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ErrorDetails;
@@ -34,8 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 @RestController
@@ -92,10 +91,11 @@ public class UserController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value = "/", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> createUser(
-			@Validated(Create.class) @RequestBody UserDto userDto) throws URISyntaxException {
-		//TODO properly return URI of new resource to spec
-		return ResponseEntity.created(new URI("")).body(userService.createUserResponse(userDto));
+			@Validated(Create.class) @RequestBody AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
+		return ResponseEntity.ok(userService.createUserResponse(accountCreationRequest));
 	}
+
+
 
 	@Operation(summary = "Get the specified user's available workspaces")
 	@ApiResponses(value = {
@@ -120,11 +120,6 @@ public class UserController {
 			@RequestParam(value = "Status to get user object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.deleteUserResponse(uuid));
 	}
-
-/*	@GetMapping(value = "/lastname/{lastname}", produces={"application/json"})
-	public ResponseEntity<ResponseContainer<UserDto>> getByLastName(@RequestParam(value = "Status to get user object with") @PathVariable String lastName) {
-		return ResponseEntity.ok(userService.findByLastNameResponse(lastName));
-	}*/
 
 	@Autowired
 	public void setUserService(UserService userService) {

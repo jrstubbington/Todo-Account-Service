@@ -41,7 +41,7 @@ class WorkspaceControllerTest {
 	}
 
 	@Test
-	void getWorkspacesV1() {
+	void testGetWorkspacesV1() {
 		PageRequest pageRequest = PageRequest.of(0, 10);
 
 		Workspace workspace = new Workspace();
@@ -59,7 +59,9 @@ class WorkspaceControllerTest {
 		when(workspacePage.isLast()).thenReturn(true);
 		when(pageable.getPageNumber()).thenReturn(0);
 
-		assertEquals(HttpStatus.OK, workspaceController.getWorkspacesV1(0, 10).getStatusCode());
-		assertEquals(workspaceResponse, workspaceController.getWorkspacesV1(0, 10));
+		assertEquals(HttpStatus.OK, workspaceController.getWorkspacesV1(0, 10).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(workspaceResponse, workspaceController.getWorkspacesV1(0, 10),
+				"Response should match expected format");
 	}
 }

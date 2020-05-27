@@ -36,7 +36,7 @@ class WorkspaceServiceTest {
 	}
 
 	@Test
-	void getAllWorkspaces() {
+	void testGetAllWorkspaces() {
 		PageRequest pageable = PageRequest.of(0, 10);
 
 		Workspace workspace = new Workspace();
@@ -45,6 +45,7 @@ class WorkspaceServiceTest {
 		when(page.getContent()).thenReturn(userList);
 
 		when(workspaceRepository.findAll(isA(PageRequest.class))).thenReturn(page);
-		assertEquals(workspace, workspaceService.getAllWorkspaces(pageable).getContent().get(0));
+		assertEquals(workspace, workspaceService.getAllWorkspaces(pageable).getContent().get(0),
+				"Correct workspaces should be returned and in the correct format");
 	}
 }

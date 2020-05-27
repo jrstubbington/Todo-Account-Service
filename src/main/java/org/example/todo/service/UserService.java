@@ -1,22 +1,27 @@
 package org.example.todo.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.todo.dto.AccountCreationRequest;
+import org.example.todo.dto.LoginDto;
 import org.example.todo.dto.UserDto;
 import org.example.todo.dto.UserProfileDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
+import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
 import org.example.todo.model.UserProfile;
 import org.example.todo.model.Workspace;
 import org.example.todo.repository.MembershipRepository;
 import org.example.todo.repository.UserRepository;
+import org.example.todo.repository.WorkspaceRepository;
 import org.example.todo.util.ResponseContainer;
 import org.example.todo.util.ResponseUtils;
 import org.example.todo.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,13 @@ public class UserService {
 
 	private MembershipRepository membershipRepository;
 
+	//TODO: this shouldn't be in the UserService, move to WorkspaceService and cleanup associated logic
+	private WorkspaceRepository workspaceRepository;
+
+	private WorkspaceService workspaceService;
+
+	private PasswordEncoder passwordEncoder;
+
 	//TODO: Enable filtering and sorting
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
@@ -55,23 +67,87 @@ public class UserService {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(findUserByUuid(uuid)), UserDto.class);
 	}
 
-/*	public List<User> findUsersByStatus(Status status) {
-		return userRepository.findByStatus(status);
-	}*/
+	@Transactional
+	public User createUser(AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
+		UserDto userDto = accountCreationRequest.getUser();
+		WorkspaceDto workspaceDto = accountCreationRequest.getWorkspace();
+		LoginDto loginDto = accountCreationRequest.getLogin();
 
-	public User createUser(UserDto userCreate) throws ImproperResourceSpecification {
-		if (Objects.isNull(userCreate.getUuid())) {
-			throw new UnsupportedOperationException("Functionality to create new users has not been implemented");
+		if (Objects.isNull(userDto) || Objects.isNull(workspaceDto)) {
+			throw new ImproperResourceSpecification("Need to specify both user and workspace information when creating a new user or workspace");
+		}
+		//Create or get existing user
+		User user;
+		if (Objects.isNull(userDto.getUuid())) {
+			if (Objects.isNull(loginDto)) {
+				throw new ImproperResourceSpecification("Need to specify login information when creating a new user");
+			}
+			//Create new User
+			//Convert LoginDto to Login Object
+			Login login = new Login();
+			login.setUsername(loginDto.getUsername());
+			login.setPasswordHash(passwordEncoder.encode(loginDto.getPlainTextPassword()));
+
+			//Convert UserProfileDto to UserProfile
+			UserProfileDto userProfileDto = userDto.getUserProfile();
+			UserProfile userProfile = UserProfile.builder()
+					.firstName(userProfileDto.getFirstName())
+					.lastName(userProfileDto.getLastName())
+					.email(userProfileDto.getEmail())
+					.build();
+
+			//Create user
+			user = User.builder()
+					.status(userDto.getStatus())
+					.userProfile(userProfile)
+					.login(login)
+					.memberships(new HashSet<>())
+					.build();
 		}
 		else {
-			throw new ImproperResourceSpecification("Cannot specify UUID when creating a resource");
+			//User already exists, get that user
+			user = findUserByUuid(userDto.getUuid());
 		}
+		//Create or get workspace
+		Workspace workspace;
+		if (Objects.isNull(workspaceDto.getUuid())) {
+			//User is being added to a new Workspace, need to create that workspace
+			workspace = workspaceService.createWorkspace(workspaceDto);
+		}
+		else {
+			//User is being added to an already existing Workspace, get that workspace
+			workspace = workspaceService.findWorkspaceByUuid(workspaceDto.getUuid());
+		}
+
+		//Create Memberships
+		//TODO: Right now roles are meaningless, but these roles need to be grabbed from the request or DB
+		Membership membership = Membership.builder()
+				.roleId(1L)
+				.build();
+
+		//Assign Memberships
+		//Get current User memberships and add new one, if any
+		Set<Membership> userMemberships = user.getMemberships();
+		userMemberships.add(membership);
+		user.setMemberships(userMemberships);
+		membership.setUser(user);
+
+		//Get current Workspace memberships and add new one, if any
+		Set<Membership> workspaceMemberships = workspace.getMemberships();
+		workspaceMemberships.add(membership);
+		workspace.setMemberships(workspaceMemberships);
+		membership.setWorkspace(workspace);
+
+		workspaceRepository.save(workspace);
+		userRepository.save(user);
+
+		return user;
+
 	}
 
-	public ResponseContainer<UserDto> createUserResponse(UserDto userCreate) {
-		throw new UnsupportedOperationException("Functionality to create new users has not been implemented");
-
-		//return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createUser(userCreate)), UserDto.class)
+	@Transactional
+	public ResponseContainer<UserDto> createUserResponse(AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
+		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createUser(accountCreationRequest)), UserDto.class);
 	}
 
 	@Transactional
@@ -134,12 +210,6 @@ public class UserService {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(deleteUser(uuid)), UserDto.class);
 	}
 
-/*	@Transactional
-	public ResponseContainer<UserDto> findByLastNameResponse(String lastName) {
-		// fetch customers by last name
-		return ResponseUtils.pageToDtoResponseContainer(userRepository.findByUserProfile_LastName(lastName), UserDto.class);
-	}*/
-
 	@Autowired
 	public void setUserRepository(UserRepository userRepository) {
 		this.userRepository = userRepository;
@@ -148,5 +218,20 @@ public class UserService {
 	@Autowired
 	public void setMembershipRepository(MembershipRepository membershipRepository) {
 		this.membershipRepository = membershipRepository;
+	}
+
+	@Autowired
+	public void setWorkspaceRepository(WorkspaceRepository workspaceRepository) {
+		this.workspaceRepository = workspaceRepository;
+	}
+
+	@Autowired
+	public void setWorkspaceService(WorkspaceService workspaceService) {
+		this.workspaceService = workspaceService;
+	}
+
+	@Autowired
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
 	}
 }

@@ -1,5 +1,6 @@
 package org.example.todo.controller;
 
+import org.example.todo.dto.AccountCreationRequest;
 import org.example.todo.dto.UserDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
@@ -15,8 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -39,7 +38,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	void getUsersV1() {
+	void testGetUsersV1() {
 		PageRequest pageRequest = PageRequest.of(0, 10);
 
 		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
@@ -47,70 +46,84 @@ class UserControllerTest {
 
 		when(userService.getAllUsersResponse(pageRequest)).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.OK, userController.getUsersV1(0, 10).getStatusCode());
-		assertEquals(userResponse, userController.getUsersV1(0, 10));
+		assertEquals(HttpStatus.OK, userController.getUsersV1(0, 10).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.getUsersV1(0, 10),
+				"Response should match expected format");
 	}
 
 	@Test
-	void getUserByUUID() throws ResourceNotFoundException {
+	void testGetUserByUUID() throws ResourceNotFoundException {
 		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
 		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.findUserByUuidResponse(isA(UUID.class))).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.OK, userController.getUserByUUID(UUID.randomUUID()).getStatusCode());
-		assertEquals(userResponse, userController.getUserByUUID(UUID.randomUUID()));
+		assertEquals(HttpStatus.OK, userController.getUserByUUID(UUID.randomUUID()).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.getUserByUUID(UUID.randomUUID()),
+				"Response should match expected format");
 	}
 
 	@Test
-	void updateUser() throws ResourceNotFoundException, ImproperResourceSpecification {
+	void testUpdateUser() throws ResourceNotFoundException, ImproperResourceSpecification {
 		UserDto userDto = new UserDto();
 		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
 		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.updateUserResponse(isA(UserDto.class))).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.OK, userController.updateUser(userDto).getStatusCode());
-		assertEquals(userResponse, userController.updateUser(userDto));
+		assertEquals(HttpStatus.OK, userController.updateUser(userDto).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.updateUser(userDto),
+				"Response should match expected format");
 	}
 
 	@Test
-	void createUser() throws ImproperResourceSpecification, URISyntaxException {
+	void testCreateUser() throws ImproperResourceSpecification, ResourceNotFoundException {
 		UserDto userDto = new UserDto();
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+
+		AccountCreationRequest accountCreationRequest = new AccountCreationRequest();
+		accountCreationRequest.setUser(userDto);
+		accountCreationRequest.setWorkspace(workspaceDto);
+
 		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = ResponseEntity.created(new URI("")).body(responseContainer);
+		ResponseEntity<ResponseContainer<UserDto>> userResponse = ResponseEntity.ok(responseContainer);
 
-		when(userService.createUserResponse(isA(UserDto.class))).thenReturn(responseContainer);
+		when(userService.createUserResponse(isA(AccountCreationRequest.class))).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.CREATED, userController.createUser(userDto).getStatusCode());
-		assertEquals(userResponse, userController.createUser(userDto));
+		assertEquals(HttpStatus.OK, userController.createUser(accountCreationRequest).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.createUser(accountCreationRequest),
+				"Response should match expected format");
 	}
 
 	@Test
-	void getUserWorkspaces() throws ResourceNotFoundException {
+	void testGetUserWorkspaces() throws ResourceNotFoundException {
 		ResponseContainer<WorkspaceDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new WorkspaceDto()));
 		ResponseEntity<ResponseContainer<WorkspaceDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.getAllWorkspacesForUserUuidResponse(isA(UUID.class))).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.OK, userController.getUserWorkspaces(UUID.randomUUID()).getStatusCode());
-		assertEquals(userResponse, userController.getUserWorkspaces(UUID.randomUUID()));
+		assertEquals(HttpStatus.OK, userController.getUserWorkspaces(UUID.randomUUID()).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.getUserWorkspaces(UUID.randomUUID()),
+				"Response should match expected format");
 	}
 
 	@Test
-	void deleteUser() throws ResourceNotFoundException {
+	void testDeleteUser() throws ResourceNotFoundException {
 		UserDto userDto = new UserDto();
 		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
 		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.deleteUserResponse(isA(UUID.class))).thenReturn(responseContainer);
 
-		assertEquals(HttpStatus.OK, userController.deleteUser(UUID.randomUUID()).getStatusCode());
-		assertEquals(userResponse, userController.deleteUser(UUID.randomUUID()));
+		assertEquals(HttpStatus.OK, userController.deleteUser(UUID.randomUUID()).getStatusCode(),
+				"Status code should be OK (200)");
+		assertEquals(userResponse, userController.deleteUser(UUID.randomUUID()),
+				"Response should match expected format");
 
 	}
-
-/*	@Test
-	void getByLastName() {
-	}*/
 }
