@@ -48,7 +48,21 @@ Access API Documentation at http://localhost:8080/swagger-ui.html
 
 ## Running the tests
 
-_**Coming soon**_
+All tests for this service are unit tests and run without the Spring Context. 
+Test coverage has Lombok generated methods in mind and many of the classes 
+where testing wouldn't be appropriate (configuration, security, logging classes) or DAO 
+classes have been ignored in Jacoco coverage reports and in SonarQube.
+
+To run the tests if using IntelliJ:
+
+1. Load the `Unit Tests` run configuration and run with code coverage
+to execute all unit tests and generate the code coverage report
+
+To run via Maven:
+
+1. Execute `mvn test` and Maven will run the tests with HTML Jacoco code coverage
+reports generated in target/site/jacoco
+
 
 ## Deployment
 
