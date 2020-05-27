@@ -33,32 +33,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-	//TODO: test for and catch exceptions related to malformed POST bodies as to not propagate the error message to the user
-
 	private UserRepository userRepository;
 
 	private MembershipRepository membershipRepository;
 
 	//TODO: Enable filtering and sorting
 	public List<User> getAllUsers() {
-		try {
-			return userRepository.findAll();
-		}
-		catch (Exception e) {
-			log.error("", e);
-			throw e;
-		}
+		return userRepository.findAll();
 	}
 
 	//TODO: Enable filtering and sorting
 	public ResponseContainer<UserDto> getAllUsersResponse(PageRequest pageRequest) {
-		try {
-			return ResponseUtils.pageToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class);
-		}
-		catch (Exception e) {
-			log.error("", e);
-			throw e;
-		}
+		return ResponseUtils.pageToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class);
 	}
 
 	public User findUserByUuid(UUID uuid) throws ResourceNotFoundException {
@@ -88,11 +74,13 @@ public class UserService {
 		//return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createUser(userCreate)), UserDto.class)
 	}
 
+	@Transactional
 	public User updateUser(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
 		if (Objects.nonNull(userUpdate.getUuid())) {
 			// User is being updated
 			log.debug("Updating User {}", userUpdate);
 			User user = findUserByUuid(userUpdate.getUuid());
+
 			UserProfile userProfile = user.getUserProfile();
 
 			UserProfileDto updateProfile = userUpdate.getUserProfile();
@@ -109,21 +97,16 @@ public class UserService {
 		}
 	}
 
+	@Transactional
 	public ResponseContainer<UserDto> updateUserResponse(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(updateUser(userUpdate)), UserDto.class);
 	}
 
 	@Transactional(readOnly = true)
 	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) throws ResourceNotFoundException {
-		try {
-			User user = findUserByUuid(uuid);
-			Set<Membership> memberships = user.getMemberships();
-			return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
-		}
-		catch (Exception e) {
-			log.error("Error", e);
-			throw e;
-		}
+		User user = findUserByUuid(uuid);
+		Set<Membership> memberships = user.getMemberships();
+		return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
 	}
 
 	@Transactional
@@ -133,27 +116,17 @@ public class UserService {
 
 	@Transactional
 	public User deleteUser(UUID uuid) throws ResourceNotFoundException {
-		try {
-			User user = findUserByUuid(uuid);
-			user.setStatus(Status.DELETED);
+		User user = findUserByUuid(uuid);
+		user.setStatus(Status.DELETED);
 
-			Set<Membership> memberships = user.getMemberships();
-			membershipRepository.deleteAll(memberships);
+		Set<Membership> memberships = user.getMemberships();
+		membershipRepository.deleteAll(memberships);
 
-			user.setLogin(null);
-			user.setMemberships(new HashSet<>());
-			user.setUserProfile(null);
+		user.setLogin(null);
+		user.setMemberships(new HashSet<>());
+		user.setUserProfile(null);
 
-			return userRepository.save(user);
-		}
-		catch (ResourceNotFoundException e) {
-			log.error("Unable to find user with id: {}", uuid);
-			throw e;
-		}
-		catch (Exception e) {
-			log.error("Unknown error has occurred", e);
-			throw e;
-		}
+		return userRepository.save(user);
 	}
 
 	@Transactional

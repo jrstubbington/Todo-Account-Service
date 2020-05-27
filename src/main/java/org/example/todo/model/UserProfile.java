@@ -1,6 +1,5 @@
 package org.example.todo.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +25,6 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class UserProfile implements Serializable {
 
 	@Id
@@ -35,12 +33,12 @@ public class UserProfile implements Serializable {
 
 	@NotBlank
 	@NotNull
-	@Size(max = 50)
+	@Size(min = 1, max = 50)
 	private  String firstName;
 
 	@NotBlank
 	@NotNull
-	@Size(max = 50)
+	@Size(min = 1, max = 50)
 	private String lastName;
 
 	@NotNull

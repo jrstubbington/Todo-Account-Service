@@ -25,6 +25,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -47,9 +48,11 @@ public class User implements Serializable {
 	@NaturalId
 	@Column(name = "UUID", nullable = false, updatable = false)
 	@GeneratedValue(generator = "hibernate-uuid")
+	@NotNull
 	private final UUID uuid = UUID.randomUUID();
 
 	@Enumerated(EnumType.STRING)
+	@NotNull
 	private Status status;
 
 	@OneToOne(fetch = FetchType.LAZY,
