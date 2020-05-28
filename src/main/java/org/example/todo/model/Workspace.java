@@ -18,7 +18,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -44,6 +47,9 @@ public class Workspace implements Serializable {
 	private final UUID uuid = UUID.randomUUID();
 
 	@NotNull
+	@NotBlank
+	@Size(max = 100)
+	@Pattern(regexp = "^(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]$") //Ensure that only characters from any language are allowed
 	private String name;
 
 	@NotNull

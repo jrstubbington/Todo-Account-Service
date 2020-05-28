@@ -1,10 +1,18 @@
 # Todo Project: Account Service
 
+This design and implementation of the Todo Project's service demonstrates familiarity and understanding of modern
+Java frameworks and design philosophies.
+
 This service is responsible for identity and role management within the Todo Microservice 
 Project. 
 
-Project has been setup to comply with [GDPR](https://gdpr-info.eu/) by deleting
-personally-identifying information, but retaining database primary keys for service linking, auditing, etc.
+
+### Features
+
+* Supports all unicode language characters for User Profile and Workspace names
+* [GDPR](https://gdpr-info.eu/) compliance by allowing login and userprofile objects to be deleted while retaining 
+primary user identifiers for service linking, auditing, etc.
+* Kafka message queues to/from other services
 
 ## Table of Contents
 
@@ -18,11 +26,13 @@ personally-identifying information, but retaining database primary keys for serv
     - [Additional Features](#additional-features)
 - [Versioning](#versioning)
 - [License](#license)
- 
+
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+
 
 ### Prerequisites
 
@@ -41,6 +51,9 @@ Additionally, supply the application with database information via command line 
 ```
     spring.datasource.url=jdbc:mysql://{YOUR_DB_INSTANCE}:3306/{YOUR_SCHEMA}?useUnicode=yes&useSSL=false&characterEncoding=UTF-8;spring.datasource.username={APP_NAME};spring.datasource.password={APP_PASSWORD}
 ```
+
+>This service is equipped with flyway and migrations to handle the related schema. In practice, this should be separated
+to it's own 'application' to preventing running with DDL rights, but for demonstration's sake it has been included here.
 
 Access server on http://localhost:8080
 
@@ -77,7 +90,7 @@ _**Coming soon**_
 * [Model Mapper](http://modelmapper.org/) - Automatic DTO (Data Transfer Object) mapping
 * [Flyway](https://flywaydb.org/) - Database Schema Versioning and Updates
 
-### Additional Features
+### Additional Libraries
 * Spring Data JPA
 * Spring Data Kafka
 * Spring AOP (Aspect Oriented Programming)

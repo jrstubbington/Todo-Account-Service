@@ -34,18 +34,18 @@ public class UserProfile implements Serializable {
 
 	@NotBlank
 	@NotNull
-	@Size(min = 1, max = 50)
-	@Pattern(regexp = "(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]") //Ensure that only characters from any language are allowed
+	@Size(max = 50)
+	@Pattern(regexp = "^(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]$") //Ensure that only characters from any language are allowed
 	private  String firstName;
 
 	@NotBlank
 	@NotNull
-	@Size(min = 1, max = 50)
-	@Pattern(regexp = "(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]") //Ensure that only characters from any language are allowed
+	@Size(max = 50)
+	@Pattern(regexp = "^(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]$") //Ensure that only characters from any language are allowed
 	private String lastName;
 
 	@NotNull
-	@Size(max = 100)
+	@Size(max = 254) //Theoretical max email length is 320 characters, but in practice should only be a max of 254
 	@Column(unique = true)
 	@Email
 	private String email;

@@ -1,5 +1,6 @@
 package org.example.todo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.todo.util.Status;
@@ -19,5 +20,6 @@ public class WorkspaceDto implements DtoEntity {
 
 	private int workspaceType;
 
+	@Schema(accessMode = Schema.AccessMode.READ_ONLY)
 	private OffsetDateTime dateCreated;
 }
