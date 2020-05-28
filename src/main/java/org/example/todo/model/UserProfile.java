@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
@@ -34,11 +35,13 @@ public class UserProfile implements Serializable {
 	@NotBlank
 	@NotNull
 	@Size(min = 1, max = 50)
+	@Pattern(regexp = "(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]") //Ensure that only characters from any language are allowed
 	private  String firstName;
 
 	@NotBlank
 	@NotNull
 	@Size(min = 1, max = 50)
+	@Pattern(regexp = "(?U)[\\p{L}][ \\p{L}'-]*?[\\p{L}]") //Ensure that only characters from any language are allowed
 	private String lastName;
 
 	@NotNull

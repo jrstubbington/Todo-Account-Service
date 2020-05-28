@@ -39,7 +39,7 @@ Clone the repository locally, build and run via IDE Tools or build to JAR artifa
 
 Additionally, supply the application with database information via command line arguments:
 ```
-    spring.datasource.url=jdbc:mysql://{YOUR_DB_INSTANCE}:3306/{YOUR_SCHEMA}?useSSL=false;spring.datasource.username={APP_NAME};spring.datasource.password={APP_PASSWORD}
+    spring.datasource.url=jdbc:mysql://{YOUR_DB_INSTANCE}:3306/{YOUR_SCHEMA}?useUnicode=yes&useSSL=false&characterEncoding=UTF-8;spring.datasource.username={APP_NAME};spring.datasource.password={APP_PASSWORD}
 ```
 
 Access server on http://localhost:8080

@@ -42,7 +42,7 @@ CREATE TABLE user_profiles (
     EMAIL varchar(100) NOT NULL,
     PRIMARY KEY (ID),
     UNIQUE KEY UK_email (EMAIL)
-) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE logins (
     ID bigint(20) NOT NULL AUTO_INCREMENT,
