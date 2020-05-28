@@ -84,7 +84,7 @@ public class UserController {
 
 	@Operation(summary = "Create a new user")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode  = "201", description = "Created"),
+			@ApiResponse(responseCode  = "200", description = "OK"),
 			@ApiResponse(responseCode  = "400", description = "Client Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class))),
 			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
@@ -94,8 +94,6 @@ public class UserController {
 			@Validated(Create.class) @RequestBody AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
 		return ResponseEntity.ok(userService.createUserResponse(accountCreationRequest));
 	}
-
-
 
 	@Operation(summary = "Get the specified user's available workspaces")
 	@ApiResponses(value = {

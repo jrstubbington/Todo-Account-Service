@@ -22,10 +22,6 @@ public class ErrorDetails {
 	private final OffsetDateTime timestamp;
 	private final String message;
 	private final List<String> details;
-	//Verbose, plain language description of the problem for the app developer with hints about how to fix it.
-/*	private final String developerMessage =""
-	//Pass this message on ot the app user, if needed.
-	private final String userMessage = ""*/
 	//Error Code
 	private final String requestInformation;
 	private final String errorCode;

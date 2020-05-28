@@ -1,7 +1,6 @@
 package org.example.todo.repository;
 
 import org.example.todo.model.User;
-import org.example.todo.util.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -17,5 +16,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByUuid(UUID uuid);
 
-	List<User> findByStatus(Status status);
 }

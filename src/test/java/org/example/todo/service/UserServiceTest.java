@@ -124,14 +124,6 @@ class UserServiceTest {
 				"Resource Not Found Exception should be thrown when an empty optional is returned");
 	}
 
-/*	@Test
-	void findUsersByStatus() {
-		when(userRepository.findByStatus(isA(Status.class))).thenReturn(mockedUserList);
-		when(mockedUserList.get(0)).thenReturn(user);
-
-		Assertions.assertEquals(user, userService.findUsersByStatus(Status.ACTIVE).get(0));
-	}*/
-
 	@Test
 	void testCreateUserWithNullUserDto() {
 		WorkspaceDto workspaceDto = new WorkspaceDto();

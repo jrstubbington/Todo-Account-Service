@@ -54,7 +54,6 @@ public class OpenAPI3Config {
 				.setGroup("Version 1")
 				.pathsToMatch("/v1/**")
 				.packagesToScan(packageName)
-//				.addOpenApiCustomiser(openApi -> openApi.setInfo(openApi.getInfo().version("v1")))
 				.build();
 	}
 
@@ -64,7 +63,6 @@ public class OpenAPI3Config {
 				.setGroup("Version 2")
 				.pathsToMatch("/v2/**")
 				.packagesToScan(packageName)
-//				.addOpenApiCustomiser(openApi -> openApi.setInfo(openApi.getInfo().version("v2")))
 				.build();
 	}
 }
