@@ -7,6 +7,7 @@ import org.example.todo.dto.UserProfileDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
+import org.example.todo.kafka.KafkaProducer;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
 import org.example.todo.model.UserProfile;
@@ -63,6 +64,9 @@ class UserServiceTest {
 	@Mock
 	private WorkspaceRepository workspaceRepository;
 
+	@Mock
+	private KafkaProducer<UserDto> kafkaProducer;
+
 	private UserService userService;
 
 	@BeforeEach
@@ -72,6 +76,7 @@ class UserServiceTest {
 		userService.setWorkspaceService(workspaceService);
 		userService.setMembershipRepository(membershipRepository);
 		userService.setWorkspaceRepository(workspaceRepository);
+		userService.setKafkaProducer(kafkaProducer);
 		userService.setPasswordEncoder(new BCryptPasswordEncoder());
 	}
 

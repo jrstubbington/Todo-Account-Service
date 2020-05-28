@@ -8,6 +8,7 @@ import org.example.todo.dto.UserProfileDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
+import org.example.todo.kafka.KafkaProducer;
 import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
+	private static final String KAFKA_TOPIC = "users";
+
 	private UserRepository userRepository;
 
 	private MembershipRepository membershipRepository;
@@ -48,6 +51,8 @@ public class UserService {
 	private WorkspaceService workspaceService;
 
 	private PasswordEncoder passwordEncoder;
+
+	private KafkaProducer<UserDto> kafkaProducer;
 
 	//TODO: Enable filtering and sorting
 	public List<User> getAllUsers() {
@@ -141,8 +146,9 @@ public class UserService {
 		workspaceRepository.save(workspace);
 		userRepository.save(user);
 
-		return user;
+		kafkaProducer.sendMessage(KAFKA_TOPIC, ResponseUtils.convertToDto(user, UserDto.class));
 
+		return user;
 	}
 
 	@Transactional
@@ -202,8 +208,17 @@ public class UserService {
 		user.setMemberships(new HashSet<>());
 		user.setUserProfile(null);
 
+
 		return userRepository.save(user);
 	}
+
+	//Service cannot receive messages from itself, but this would be the basic config for setting up the listener
+/*	@KafkaListener(topics = KAFKA_TOPIC)
+	public void listen(UserDto userDto,
+	                   Acknowledgment acknowledgment) {
+		log.debug("Received Message: {}", userDto);
+		acknowledgment.acknowledge();
+	}*/
 
 	@Transactional
 	public ResponseContainer<UserDto> deleteUserResponse(UUID uuid) throws ResourceNotFoundException {
@@ -223,6 +238,11 @@ public class UserService {
 	@Autowired
 	public void setWorkspaceRepository(WorkspaceRepository workspaceRepository) {
 		this.workspaceRepository = workspaceRepository;
+	}
+
+	@Autowired
+	public void setKafkaProducer(KafkaProducer<UserDto> kafkaProducer) {
+		this.kafkaProducer = kafkaProducer;
 	}
 
 	@Autowired

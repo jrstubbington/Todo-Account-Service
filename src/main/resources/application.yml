@@ -47,6 +47,10 @@ flyway:
   enabled: true
   baselineOnMigrate: false
 
+kafka:
+  bootstrapAddress: #set via env parameter
+  groupId: account-service
+
 logging:
   config: classpath:log4j2.xml
   level:
