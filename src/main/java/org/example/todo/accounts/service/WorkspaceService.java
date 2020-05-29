@@ -1,13 +1,13 @@
 package org.example.todo.accounts.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.todo.accounts.exception.ResourceNotFoundException;
+import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.WorkspaceRepository;
-import org.example.todo.accounts.util.ResponseContainer;
-import org.example.todo.accounts.dto.WorkspaceDto;
-import org.example.todo.accounts.exception.ImproperResourceSpecification;
-import org.example.todo.accounts.util.ResponseUtils;
+import org.example.todo.common.util.ResponseContainer;
+import org.example.todo.common.dto.WorkspaceDto;
+import org.example.todo.common.exceptions.ImproperResourceSpecification;
+import org.example.todo.common.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

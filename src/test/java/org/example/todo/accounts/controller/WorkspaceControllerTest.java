@@ -1,9 +1,9 @@
 package org.example.todo.accounts.controller;
 
 import org.example.todo.accounts.model.Workspace;
-import org.example.todo.accounts.util.ResponseContainer;
-import org.example.todo.accounts.dto.WorkspaceDto;
 import org.example.todo.accounts.service.WorkspaceService;
+import org.example.todo.common.dto.WorkspaceDto;
+import org.example.todo.common.util.ResponseContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

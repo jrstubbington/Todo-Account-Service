@@ -12,7 +12,7 @@ Project.
 * Supports all unicode language characters for User Profile and Workspace names
 * [GDPR](https://gdpr-info.eu/) compliance by allowing login and userprofile objects to be deleted while retaining 
 primary user identifiers for service linking, auditing, etc.
-* Kafka message queues to/from other services
+* Kafka message queues to/from other services with guarenteed message ordering for specific entity based on UUID
 
 ## Table of Contents
 
@@ -41,6 +41,7 @@ Java 8
 Maven
 MySQL DB 5 or Later
 Lombok IDE Plugin
+Todo Project Common Library
 ```
 
 ### Installation

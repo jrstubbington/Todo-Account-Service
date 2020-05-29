@@ -1,11 +1,12 @@
 package org.example.todo.accounts.service;
 
-import org.example.todo.accounts.exception.ResourceNotFoundException;
+
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.WorkspaceRepository;
-import org.example.todo.accounts.dto.WorkspaceDto;
-import org.example.todo.accounts.exception.ImproperResourceSpecification;
-import org.example.todo.accounts.util.Status;
+import org.example.todo.common.dto.WorkspaceDto;
+import org.example.todo.common.exceptions.ImproperResourceSpecification;
+import org.example.todo.common.exceptions.ResourceNotFoundException;
+import org.example.todo.common.util.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

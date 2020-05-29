@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.example.todo.accounts.util.Status;
+import org.example.todo.common.util.Status;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 

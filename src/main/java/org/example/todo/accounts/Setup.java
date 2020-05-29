@@ -8,7 +8,7 @@ import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.UserRepository;
 import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.accounts.model.UserProfile;
-import org.example.todo.accounts.util.Status;
+import org.example.todo.common.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
