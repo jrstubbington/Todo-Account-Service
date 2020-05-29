@@ -217,12 +217,12 @@
                 <version>0.8.3</version>
                 <configuration>
                     <excludes>
-                        <exclude>org/example/todo/Application.class</exclude>
-                        <exclude>org/example/todo/Setup.class</exclude>
-                        <exclude>org/example/todo/util/LoggingAspect.class</exclude>
-                        <exclude>org/example/todo/config/*</exclude>
-                        <exclude>org/example/todo/security/*</exclude>
-                        <exclude>org/example/todo/kafka/KafkaProducer.class</exclude>
+                        <exclude>org/example/todo/accounts/Application.class</exclude>
+                        <exclude>org/example/todo/accounts/Setup.class</exclude>
+                        <exclude>org/example/todo/accounts/util/LoggingAspect.class</exclude>
+                        <exclude>org/example/todo/accounts/config/*</exclude>
+                        <exclude>org/example/todo/accounts/security/*</exclude>
+                        <exclude>org/example/todo/accounts/kafka/KafkaProducer.class</exclude>
                     </excludes>
                 </configuration>
                <executions>
