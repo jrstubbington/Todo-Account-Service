@@ -8,6 +8,7 @@ import org.example.todo.dto.UserProfileDto;
 import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
+import org.example.todo.kafka.KafkaOperation;
 import org.example.todo.kafka.KafkaProducer;
 import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
@@ -143,12 +144,13 @@ public class UserService {
 		workspace.setMemberships(workspaceMemberships);
 		membership.setWorkspace(workspace);
 
-		workspaceRepository.save(workspace);
-		userRepository.save(user);
+		Workspace savedWorkspace = workspaceRepository.save(workspace);
+		User savedUser = userRepository.save(user);
 
-		kafkaProducer.sendMessage(KAFKA_TOPIC, ResponseUtils.convertToDto(user, UserDto.class));
+		kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.CREATE,
+				ResponseUtils.convertToDto(savedUser, UserDto.class));
 
-		return user;
+		return savedUser;
 	}
 
 	@Transactional
@@ -172,10 +174,16 @@ public class UserService {
 			userProfile.setEmail(updateProfile.getEmail());
 
 			user.setStatus(userUpdate.getStatus());
-			return userRepository.save(user);
+
+			User savedUser = userRepository.save(user);
+
+			kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.UPDATE,
+					ResponseUtils.convertToDto(savedUser, UserDto.class));
+
+			return savedUser;
 		}
 		else {
-			throw new ImproperResourceSpecification("Must specify a UUID when updating a resource");
+			throw new ImproperResourceSpecification("Must specify a UUID when updating a user");
 		}
 	}
 
@@ -208,8 +216,12 @@ public class UserService {
 		user.setMemberships(new HashSet<>());
 		user.setUserProfile(null);
 
+		User savedUser = userRepository.save(user);
 
-		return userRepository.save(user);
+		kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.DELETE,
+				ResponseUtils.convertToDto(savedUser, UserDto.class));
+
+		return savedUser;
 	}
 
 	//Service cannot receive messages from itself, but this would be the basic config for setting up the listener

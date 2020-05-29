@@ -8,6 +8,7 @@ import org.example.todo.dto.WorkspaceDto;
 import org.example.todo.exception.ImproperResourceSpecification;
 import org.example.todo.exception.ResourceNotFoundException;
 import org.example.todo.kafka.KafkaProducer;
+import org.example.todo.model.Login;
 import org.example.todo.model.Membership;
 import org.example.todo.model.User;
 import org.example.todo.model.UserProfile;
@@ -15,6 +16,7 @@ import org.example.todo.model.Workspace;
 import org.example.todo.repository.MembershipRepository;
 import org.example.todo.repository.UserRepository;
 import org.example.todo.repository.WorkspaceRepository;
+import org.example.todo.util.ResponseUtils;
 import org.example.todo.util.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -56,9 +59,6 @@ class UserServiceTest {
 	private List<User> mockedUserList;
 
 	@Mock
-	private User user;
-
-	@Mock
 	private WorkspaceService workspaceService;
 
 	@Mock
@@ -69,6 +69,10 @@ class UserServiceTest {
 
 	private UserService userService;
 
+	private User user;
+
+	private Workspace workspace;
+
 	@BeforeEach
 	void setup(){
 		userService = new UserService();
@@ -78,6 +82,36 @@ class UserServiceTest {
 		userService.setWorkspaceRepository(workspaceRepository);
 		userService.setKafkaProducer(kafkaProducer);
 		userService.setPasswordEncoder(new BCryptPasswordEncoder());
+
+		workspace = new Workspace();
+		workspace.setId(1L);
+
+		Membership membership = new Membership();
+		membership.setWorkspace(workspace);
+
+		Set<Membership> memberships = new HashSet<>();
+		memberships.add(membership);
+
+		UserProfile userProfile = UserProfile.builder()
+				.id(1L)
+				.firstName("John")
+				.lastName("Doe")
+				.email("jdoe@example.org")
+				.build();
+
+		Login login = Login.builder()
+				.id(1L)
+				.username("jdoe")
+				.passwordHash(new BCryptPasswordEncoder().encode("mysupersecretpassword"))
+				.build();
+
+		user = User.builder()
+				.status(Status.ACTIVE)
+				.userProfile(userProfile)
+				.login(login)
+				.memberships(memberships)
+				.build();
+
 	}
 
 	@Test
@@ -98,7 +132,7 @@ class UserServiceTest {
 		when(page.getPageable()).thenReturn(pageable);
 
 		when(userRepository.findAll(isA(PageRequest.class))).thenReturn(page);
-		assertEquals(new UserDto(), userService.getAllUsersResponse(pageable).getData().get(0),
+		assertEquals(ResponseUtils.convertToDto(user, UserDto.class), userService.getAllUsersResponse(pageable).getData().get(0),
 				"UserDto should be returned from the list in the response body");
 	}
 
@@ -116,7 +150,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.of(user);
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		assertEquals(new UserDto(), userService.findUserByUuidResponse(UUID.randomUUID()).getData().get(0),
+		assertEquals(ResponseUtils.convertToDto(user, UserDto.class), userService.findUserByUuidResponse(UUID.randomUUID()).getData().get(0),
 				"User should be returned via response entity list");
 	}
 
@@ -174,10 +208,17 @@ class UserServiceTest {
 		Workspace workspace = new Workspace();
 		workspace.setMemberships(new HashSet<>());
 
+		User user = User.builder()
+				.login(new Login())
+				.memberships(new HashSet<>())
+				.userProfile(new UserProfile())
+				.status(Status.ACTIVE)
+				.build();
+
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
 		when(workspaceService.findWorkspaceByUuid(isA(UUID.class))).thenReturn(workspace);
-		when(user.getMemberships()).thenReturn(new HashSet<>());
+		when(userRepository.save(user)).thenReturn(user);
 
 		assertDoesNotThrow(() -> userService.createUser(accountCreationRequest),
 				"Account Creation request with existing user and workspace should not fail");
@@ -201,6 +242,12 @@ class UserServiceTest {
 		loginDto.setUsername("tstark");
 		loginDto.setPlainTextPassword("supersecretpassword");
 
+		UserProfile userProfile = UserProfile.builder()
+				.firstName("Bob")
+				.lastName("Smith")
+				.email("bsmith@example.org")
+				.build();
+
 		//Generate input UserDto UserProfile
 		UserProfileDto updateProfile = new UserProfileDto();
 		updateProfile.setFirstName("Bob");
@@ -219,6 +266,9 @@ class UserServiceTest {
 		accountCreationRequest.setLogin(loginDto);
 		accountCreationRequest.setWorkspace(workspaceDto);
 
+		User user = new User();
+		user.setUserProfile(userProfile);
+
 
 		Workspace workspace = Workspace.builder().name("Workspace").status(Status.ACTIVE).memberships(new HashSet<>()).build();
 
@@ -235,32 +285,25 @@ class UserServiceTest {
 	void testUpdateUser() throws ResourceNotFoundException, ImproperResourceSpecification {
 		//Generate input UserDto
 		UserDto userDto = new UserDto();
-		userDto.setUuid(UUID.randomUUID());
-
-		//Generate Fake Return User Profile
-		UserProfile userProfile = new UserProfile();
-		userProfile.setFirstName("Bob");
-		userProfile.setLastName("Smith");
-		userProfile.setEmail("bsmith@example.org");
+		userDto.setUuid(user.getUuid());
 
 		//Generate input UserDto UserProfile
-		UserProfileDto updateProfile = new UserProfileDto();
-		updateProfile.setFirstName("John");
-		updateProfile.setLastName("Smith");
-		updateProfile.setEmail("jsmith@example.org");
 
 		UserProfile updatedUserProfile = UserProfile.builder()
-				.firstName("John")
+				.id(1L)
+				.firstName("Bob")
 				.lastName("Smith")
 				.email("jsmith@example.org")
 				.build();
+
+		ModelMapper modelMapper = new ModelMapper();
+		UserProfileDto updateProfile = modelMapper.map(updatedUserProfile, UserProfileDto.class);
 
 		//Set generated UserProfile in generated userDto
 		userDto.setUserProfile(updateProfile);
 
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(user.getUserProfile()).thenReturn(userProfile);
 		when(userRepository.save(isA(User.class))).thenReturn(user);
 
 		User user = userService.updateUser(userDto);
@@ -283,11 +326,6 @@ class UserServiceTest {
 		UserDto userDto = new UserDto();
 		userDto.setUuid(UUID.randomUUID());
 
-		UserProfile userProfile = new UserProfile();
-		userProfile.setFirstName("Bob");
-		userProfile.setLastName("Smith");
-		userProfile.setEmail("bsmith@example.org");
-
 		//Generate input UserDto UserProfile
 		UserProfileDto updateProfile = new UserProfileDto();
 		updateProfile.setFirstName("John");
@@ -298,7 +336,6 @@ class UserServiceTest {
 		userDto.setUserProfile(updateProfile);
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(user.getUserProfile()).thenReturn(userProfile);
 		when(userRepository.save(isA(User.class))).thenReturn(user);
 
 		assertEquals(updateProfile, userService.updateUserResponse(userDto).getData().get(0).getUserProfile(),
@@ -307,19 +344,8 @@ class UserServiceTest {
 
 	@Test
 	void testGetAllWorkspacesForUserUuid() throws ResourceNotFoundException {
-
-		Workspace workspace = new Workspace();
-		workspace.setId(1L);
-
-		Membership membership = new Membership();
-		membership.setWorkspace(workspace);
-
-		Set<Membership> memberships = new HashSet<>();
-		memberships.add(membership);
-
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(user.getMemberships()).thenReturn(memberships);
 
 		Set<Workspace> workspaces = new HashSet<>();
 		workspaces.add(workspace);
@@ -339,18 +365,8 @@ class UserServiceTest {
 
 	@Test
 	void testGetAllWorkspacesForUserUuidResponse() throws ResourceNotFoundException {
-		Workspace workspace = new Workspace();
-		workspace.setId(1L);
-
-		Membership membership = new Membership();
-		membership.setWorkspace(workspace);
-
-		Set<Membership> memberships = new HashSet<>();
-		memberships.add(membership);
-
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(user.getMemberships()).thenReturn(memberships);
 
 		WorkspaceDto workspaceDto = new WorkspaceDto();
 		workspaceDto.setUuid(workspace.getUuid());
@@ -363,18 +379,6 @@ class UserServiceTest {
 
 	@Test
 	void testDeleteUser() throws ResourceNotFoundException {
-		Workspace workspace = new Workspace();
-		workspace.setId(1L);
-
-		Membership membership = new Membership();
-		membership.setWorkspace(workspace);
-		Set<Membership> memberships = new HashSet<>();
-		memberships.add(membership);
-
-		User user = new User();
-		user.setStatus(Status.ACTIVE);
-		user.setMemberships(memberships);
-
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
 		when(userRepository.save(user)).thenReturn(user);
