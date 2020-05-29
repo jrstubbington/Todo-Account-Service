@@ -217,7 +217,7 @@ class UserServiceTest {
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
 		when(workspaceService.findWorkspaceByUuid(isA(UUID.class))).thenReturn(workspace);
-		when(userRepository.save(user)).thenReturn(user);
+		when(userRepository.saveAndFlush(user)).thenReturn(user);
 
 		Assertions.assertDoesNotThrow(() -> userService.createUser(accountCreationRequest),
 				"Account Creation request with existing user and workspace should not fail");
@@ -272,7 +272,7 @@ class UserServiceTest {
 		Workspace workspace = Workspace.builder().name("Workspace").status(Status.ACTIVE).memberships(new HashSet<>()).build();
 
 		when(workspaceService.createWorkspace(isA(WorkspaceDto.class))).thenReturn(workspace);
-		when(userRepository.save(isA(User.class))).thenReturn(user);
+		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
 		assertEquals(updateProfile, userService.createUserResponse(accountCreationRequest).getData().get(0).getUserProfile(),
 				"Returned user profile should match passed in object");
@@ -303,7 +303,7 @@ class UserServiceTest {
 
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(userRepository.save(isA(User.class))).thenReturn(user);
+		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
 		User user = userService.updateUser(userDto);
 		assertEquals(updatedUserProfile, user.getUserProfile(),
@@ -335,7 +335,7 @@ class UserServiceTest {
 		userDto.setUserProfile(updateProfile);
 
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(userRepository.save(isA(User.class))).thenReturn(user);
+		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
 		assertEquals(updateProfile, userService.updateUserResponse(userDto).getData().get(0).getUserProfile(),
 				"A returned user's profile should be in the correct object body");
@@ -380,7 +380,7 @@ class UserServiceTest {
 	void testDeleteUser() throws ResourceNotFoundException {
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(userRepository.save(user)).thenReturn(user);
+		when(userRepository.saveAndFlush(user)).thenReturn(user);
 
 		Assertions.assertDoesNotThrow(() -> userService.deleteUser(UUID.randomUUID()),
 				"Deleting a User should not throw exceptions");
@@ -407,7 +407,7 @@ class UserServiceTest {
 	void testDeleteUserResponse() throws ResourceNotFoundException {
 		Optional<User> optionalUser = Optional.of(user);
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
-		when(userRepository.save(isA(User.class))).thenReturn(user);
+		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
 		Assertions.assertNull(userService.deleteUserResponse(UUID.randomUUID()).getData().get(0).getUserProfile(),
 				"Deleting a user should return data in the correct format");

@@ -144,8 +144,8 @@ public class UserService {
 		workspace.setMemberships(workspaceMemberships);
 		membership.setWorkspace(workspace);
 
-		workspaceRepository.save(workspace); //TODO: move functionality to workspaceService
-		User savedUser = userRepository.save(user);
+		workspaceRepository.saveAndFlush(workspace); //TODO: move functionality to workspaceService
+		User savedUser = userRepository.saveAndFlush(user);
 
 		kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.CREATE,
 				ResponseUtils.convertToDto(savedUser, UserDto.class));
@@ -175,7 +175,7 @@ public class UserService {
 
 			user.setStatus(userUpdate.getStatus());
 
-			User savedUser = userRepository.save(user);
+			User savedUser = userRepository.saveAndFlush(user);
 
 			kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.UPDATE,
 					ResponseUtils.convertToDto(savedUser, UserDto.class));
@@ -216,7 +216,7 @@ public class UserService {
 		user.setMemberships(new HashSet<>());
 		user.setUserProfile(null);
 
-		User savedUser = userRepository.save(user);
+		User savedUser = userRepository.saveAndFlush(user);
 
 		kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.DELETE,
 				ResponseUtils.convertToDto(savedUser, UserDto.class));
