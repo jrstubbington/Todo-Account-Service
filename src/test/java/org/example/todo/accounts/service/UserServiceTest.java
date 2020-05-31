@@ -37,7 +37,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -386,9 +388,9 @@ class UserServiceTest {
 				"Deleting a User should not throw exceptions");
 		assertEquals(Status.DELETED, userService.deleteUser(UUID.randomUUID()).getStatus(),
 				"The returned user object should have a DELETED status");
-		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getLogin(),
+		assertNull(userService.deleteUser(UUID.randomUUID()).getLogin(),
 				"The user's login information should have been removed");
-		Assertions.assertNull(userService.deleteUser(UUID.randomUUID()).getUserProfile(),
+		assertNull(userService.deleteUser(UUID.randomUUID()).getUserProfile(),
 				"The user's profile information should have been deleted");
 		assertEquals(new HashSet<>(), userService.deleteUser(UUID.randomUUID()).getMemberships(),
 				"The user's memberships should have been deleted");
@@ -409,7 +411,30 @@ class UserServiceTest {
 		when(userRepository.findByUuid(isA(UUID.class))).thenReturn(optionalUser);
 		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
-		Assertions.assertNull(userService.deleteUserResponse(UUID.randomUUID()).getData().get(0).getUserProfile(),
+		assertNull(userService.deleteUserResponse(UUID.randomUUID()).getData().get(0).getUserProfile(),
 				"Deleting a user should return data in the correct format");
+	}
+
+	@Test
+	void testGetAllUsersInWorkspace() throws ImproperResourceSpecification {
+		Set<User> users = new HashSet<>();
+		users.add(user);
+		when(userRepository.findDistinctByMemberships_workspaceUuid(isA(UUID.class))).thenReturn(users);
+
+		WorkspaceDto workspacedto = new WorkspaceDto();
+		workspacedto.setUuid(UUID.randomUUID());
+
+		assertDoesNotThrow(() -> userService.getAllUsersInWorkspace(workspacedto),
+				"Should return a list of users belonging to a particular workspace");
+
+	}
+
+	@Test
+	void testGetAllUsersInWorkspaceThrowsImproperResourceSpecification() {
+		WorkspaceDto workspacedto = new WorkspaceDto();
+
+		assertThrows(ImproperResourceSpecification.class, () -> userService.getAllUsersInWorkspace(workspacedto),
+				"Should throw ImproperResourceSpecification when failing to specify workspace UUID");
+
 	}
 }

@@ -16,7 +16,7 @@ spring:
 
   jpa:
     show-sql: false
-    generate-ddl: true
+    generate-ddl: false
     properties:
       ## Hibernate Properties
       hibernate:
@@ -25,7 +25,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
         ## This is important
         # Hibernate ddl auto (create, create-drop, validate, update)
-        ddl-auto: create
+        ddl-auto: validate
 
 server:
   shutdown: graceful

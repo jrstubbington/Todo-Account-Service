@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 //Suppressing warning for Sonarqube function naming convention as JPA defines rules that don't comply
@@ -15,5 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	User findById(long id);
 
 	Optional<User> findByUuid(UUID uuid);
+
+	Set<User> findDistinctByMemberships_workspaceUuid(UUID uuid);
 
 }

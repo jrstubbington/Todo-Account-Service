@@ -4,10 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.todo.accounts.model.Login;
 import org.example.todo.accounts.model.Membership;
 import org.example.todo.accounts.model.User;
+import org.example.todo.accounts.model.UserProfile;
 import org.example.todo.accounts.model.Workspace;
+import org.example.todo.accounts.repository.MembershipRepository;
 import org.example.todo.accounts.repository.UserRepository;
 import org.example.todo.accounts.repository.WorkspaceRepository;
-import org.example.todo.accounts.model.UserProfile;
 import org.example.todo.common.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -39,11 +41,15 @@ public class Setup {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private MembershipRepository membershipRepository;
+
 	@Bean
 	@Transactional
 	public CommandLineRunner demo(UserRepository repository, WorkspaceRepository workspaceRepository) {
 		return args -> {
 
+			UUID workspaceUuid = null;
 			try {
 				Workspace workspace1 = Workspace.builder()
 						.name("Unique Workspace")
@@ -96,10 +102,10 @@ public class Setup {
 					memship.setUser(user);
 				}
 
-				workspaceRepository.save(workspace);
+				Workspace testingObject = workspaceRepository.save(workspace);
 				repository.saveAndFlush(user);
 
-
+				workspaceUuid = testingObject.getUuid();
 
 
 				repository.save(User.builder()
@@ -179,6 +185,7 @@ public class Setup {
 			}
 			findByLastName("Doe");
 
+			log.info("USERS IN WORKSPACE {}:\n {}", workspaceUuid, userRepository.findDistinctByMemberships_workspaceUuid(workspaceUuid));
 		};
 	}
 

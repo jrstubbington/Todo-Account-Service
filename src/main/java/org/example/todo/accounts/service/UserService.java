@@ -187,6 +187,15 @@ public class UserService {
 		}
 	}
 
+	public Set<User> getAllUsersInWorkspace(WorkspaceDto workspaceDto) throws ImproperResourceSpecification {
+		if (Objects.nonNull(workspaceDto.getUuid())) {
+			return userRepository.findDistinctByMemberships_workspaceUuid(workspaceDto.getUuid());
+		}
+		else {
+			throw new ImproperResourceSpecification("Must specify UUID of workspace when searching for users in that workspace");
+		}
+	}
+
 	@Transactional
 	public ResponseContainer<UserDto> updateUserResponse(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(updateUser(userUpdate)), UserDto.class);
