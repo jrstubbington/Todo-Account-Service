@@ -29,6 +29,16 @@ spring:
 
 server:
   shutdown: graceful
+  http2:
+  # Enable HTTP/2 support, if the current environment supports it
+    enabled: true
+  compression:
+  # Enable response compression
+    enabled: true
+  # The comma-separated list of mime types that should be compressed
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+  # Compress the response only if the response size is at least 1KB
+    min-response-size: 1024
 
 springdoc:
   show-actuator: true
@@ -52,7 +62,7 @@ kafka:
   groupId: account-service
 
 logging:
-  config: classpath:log4j2.xml
+  config: classpath:log4j2-json.xml
   level:
     root: ERROR
     org:

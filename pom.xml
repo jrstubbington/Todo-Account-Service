@@ -22,9 +22,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/jrstubbington/Todo-Users-Service.git</connection>
-        <url>https://github.com/jrstubbington/Todo-Users-Service</url>
-        <developerConnection>scm:git:https://github.com/jrstubbington/Todo-Users-Service.git</developerConnection>
+        <connection>scm:git:https://github.com/jrstubbington/Todo-Account-Service.git</connection>
+        <url>https://github.com/jrstubbington/Todo-Account-Service</url>
+        <developerConnection>scm:git:https://github.com/jrstubbington/Todo-Account-Service.git</developerConnection>
     </scm>
 
     <repositories>
@@ -222,8 +222,8 @@
                 <version>0.8.3</version>
                 <configuration>
                     <excludes>
-                        <exclude>org/example/todo/*/Application.class</exclude>
-                        <exclude>org/example/todo/*/Setup.class</exclude>
+                        <exclude>org/example/todo/*/Application.java</exclude>
+                        <exclude>org/example/todo/*/Setup.java</exclude>
                         <exclude>org/example/todo/*/config/*</exclude>
                         <exclude>org/example/todo/*/security/*</exclude>
                     </excludes>

@@ -6,7 +6,9 @@ import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.common.dto.WorkspaceDto;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
+import org.example.todo.common.kafka.KafkaProducer;
 import org.example.todo.common.util.Status;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -32,6 +35,9 @@ class WorkspaceServiceTest {
 	@Mock
 	private WorkspaceRepository workspaceRepository;
 
+	@Mock
+	private KafkaProducer<WorkspaceDto> kafkaProducer;
+
 	private WorkspaceService workspaceService;
 
 	@Mock
@@ -41,6 +47,7 @@ class WorkspaceServiceTest {
 	private void setup(){
 		workspaceService = new WorkspaceService();
 		workspaceService.setWorkspaceRepository(workspaceRepository);
+		workspaceService.setKafkaProducer(kafkaProducer);
 	}
 
 	@Test
@@ -97,12 +104,19 @@ class WorkspaceServiceTest {
 		workspaceDto.setStatus(Status.ACTIVE);
 		workspaceDto.setWorkspaceType(1);
 
-		Workspace workspace = workspaceService.createWorkspace(workspaceDto);
-		assertEquals(workspaceDto.getName(), workspace.getName(),
+		Workspace workspace = new Workspace();
+		workspace.setName("Workspace");
+		workspace.setStatus(Status.ACTIVE);
+		workspace.setWorkspaceType(1);
+
+		when(workspaceRepository.saveAndFlush(isA(Workspace.class))).thenReturn(workspace);
+
+		Workspace returnedWorkpace = workspaceService.createWorkspace(workspaceDto);
+		assertEquals(workspaceDto.getName(), returnedWorkpace.getName(),
 				"Name value should transfer to new object");
-		assertEquals(workspaceDto.getStatus(), workspace.getStatus(),
+		assertEquals(workspaceDto.getStatus(), returnedWorkpace.getStatus(),
 				"Status value should transfer to new object");
-		assertEquals(workspaceDto.getWorkspaceType(), workspace.getWorkspaceType(),
+		assertEquals(workspaceDto.getWorkspaceType(), returnedWorkpace.getWorkspaceType(),
 				"Workspace Type value should transfer to new object");
 	}
 
@@ -117,5 +131,24 @@ class WorkspaceServiceTest {
 
 		assertThrows(ImproperResourceSpecification.class, () -> workspaceService.createWorkspace(workspaceDto),
 				"An ImproperResourceSpecification should be thrown when specifying a UUID creating a new workspace");
+	}
+
+	@Test
+	void testCreateWorkspaceResponse() throws ImproperResourceSpecification {
+		WorkspaceDto workspaceDto = new WorkspaceDto();
+		workspaceDto.setName("Workspace");
+		workspaceDto.setStatus(Status.ACTIVE);
+		workspaceDto.setWorkspaceType(1);
+
+		Workspace workspace = new Workspace();
+		workspace.setName("Workspace");
+		workspace.setStatus(Status.ACTIVE);
+		workspace.setWorkspaceType(1);
+
+		when(workspaceRepository.saveAndFlush(isA(Workspace.class))).thenReturn(workspace);
+
+		assertNotNull(workspaceService.createWorkspaceResponse(workspaceDto).getData().get(0), "Returned user profile should match passed in object");
+		Assertions.assertDoesNotThrow(() -> workspaceService.createWorkspaceResponse(workspaceDto),
+				"Creating a user when specifying all necessary parameters should not throw an exception");
 	}
 }

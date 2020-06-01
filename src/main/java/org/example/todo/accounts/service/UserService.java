@@ -9,7 +9,6 @@ import org.example.todo.accounts.model.UserProfile;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.MembershipRepository;
 import org.example.todo.accounts.repository.UserRepository;
-import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.common.dto.LoginDto;
 import org.example.todo.common.dto.UserDto;
 import org.example.todo.common.dto.UserProfileDto;
@@ -44,10 +43,8 @@ public class UserService {
 
 	private UserRepository userRepository;
 
+	//TODO: this shouldn't be in the UserService, move to MembershipService and cleanup associated logic
 	private MembershipRepository membershipRepository;
-
-	//TODO: this shouldn't be in the UserService, move to WorkspaceService and cleanup associated logic
-	private WorkspaceRepository workspaceRepository;
 
 	private WorkspaceService workspaceService;
 
@@ -144,7 +141,6 @@ public class UserService {
 		workspace.setMemberships(workspaceMemberships);
 		membership.setWorkspace(workspace);
 
-		workspaceRepository.saveAndFlush(workspace); //TODO: move functionality to workspaceService
 		User savedUser = userRepository.saveAndFlush(user);
 
 		kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.CREATE,
@@ -187,13 +183,19 @@ public class UserService {
 		}
 	}
 
-	public Set<User> getAllUsersInWorkspace(WorkspaceDto workspaceDto) throws ImproperResourceSpecification {
-		if (Objects.nonNull(workspaceDto.getUuid())) {
-			return userRepository.findDistinctByMemberships_workspaceUuid(workspaceDto.getUuid());
+	public Set<User> getAllUsersInWorkspace(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+		if (Objects.nonNull(uuid)) {
+			//Attempt to find workspace or else throw from workspaceService
+			workspaceService.findWorkspaceByUuid(uuid);
+			return userRepository.findDistinctByMemberships_workspaceUuid(uuid);
 		}
 		else {
 			throw new ImproperResourceSpecification("Must specify UUID of workspace when searching for users in that workspace");
 		}
+	}
+
+	public ResponseContainer<UserDto> getAllUsersInWorkspaceResponse(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+		return ResponseUtils.pageToDtoResponseContainer(new ArrayList<>(getAllUsersInWorkspace(uuid)), UserDto.class);
 	}
 
 	@Transactional
@@ -246,11 +248,6 @@ public class UserService {
 	@Autowired
 	public void setMembershipRepository(MembershipRepository membershipRepository) {
 		this.membershipRepository = membershipRepository;
-	}
-
-	@Autowired
-	public void setWorkspaceRepository(WorkspaceRepository workspaceRepository) {
-		this.workspaceRepository = workspaceRepository;
 	}
 
 	@Autowired

@@ -80,7 +80,6 @@ class UserServiceTest {
 		userService.setUserRepository(userRepository);
 		userService.setWorkspaceService(workspaceService);
 		userService.setMembershipRepository(membershipRepository);
-		userService.setWorkspaceRepository(workspaceRepository);
 		userService.setKafkaProducer(kafkaProducer);
 		userService.setPasswordEncoder(new BCryptPasswordEncoder());
 
@@ -421,20 +420,25 @@ class UserServiceTest {
 		users.add(user);
 		when(userRepository.findDistinctByMemberships_workspaceUuid(isA(UUID.class))).thenReturn(users);
 
-		WorkspaceDto workspacedto = new WorkspaceDto();
-		workspacedto.setUuid(UUID.randomUUID());
-
-		assertDoesNotThrow(() -> userService.getAllUsersInWorkspace(workspacedto),
+		assertDoesNotThrow(() -> userService.getAllUsersInWorkspace(UUID.randomUUID()),
 				"Should return a list of users belonging to a particular workspace");
 
 	}
 
 	@Test
 	void testGetAllUsersInWorkspaceThrowsImproperResourceSpecification() {
-		WorkspaceDto workspacedto = new WorkspaceDto();
-
-		assertThrows(ImproperResourceSpecification.class, () -> userService.getAllUsersInWorkspace(workspacedto),
+		assertThrows(ImproperResourceSpecification.class, () -> userService.getAllUsersInWorkspace(null),
 				"Should throw ImproperResourceSpecification when failing to specify workspace UUID");
+	}
+
+	@Test
+	void testGetAllUsersInWorkspaceResponse() throws ImproperResourceSpecification {
+		Set<User> users = new HashSet<>();
+		users.add(user);
+		when(userRepository.findDistinctByMemberships_workspaceUuid(isA(UUID.class))).thenReturn(users);
+
+		assertDoesNotThrow(() -> userService.getAllUsersInWorkspaceResponse(UUID.randomUUID()),
+				"Should return a list of users belonging to a particular workspace");
 
 	}
 }

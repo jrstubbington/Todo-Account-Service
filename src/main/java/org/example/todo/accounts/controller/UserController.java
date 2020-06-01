@@ -103,7 +103,7 @@ public class UserController {
 	})
 	@GetMapping(value = "/{id}/workspaces", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<WorkspaceDto>> getUserWorkspaces(
-			@RequestParam(value = "Status to get user object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
+			@RequestParam(value = "UUID of user to get workspaces for") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.getAllWorkspacesForUserUuidResponse(uuid));
 	}
 
@@ -115,7 +115,7 @@ public class UserController {
 	})
 	@DeleteMapping(value = "/{id}", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> deleteUser(
-			@RequestParam(value = "Status to get user object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
+			@RequestParam(value = "UUID of user to delete") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.deleteUserResponse(uuid));
 	}
 
