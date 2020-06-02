@@ -1,6 +1,7 @@
 package org.example.todo.accounts.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +20,6 @@ import org.example.todo.common.util.verification.group.Create;
 import org.example.todo.common.util.verification.group.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,10 +64,10 @@ public class UserController {
 			@ApiResponse(responseCode = "200", description = "OK"),
 			@ApiResponse(responseCode  = "500", description = "Internal error has occurred", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
-	@GetMapping(value = "/{id}", produces={"application/json"})
+	@GetMapping(value = "/{uuid}", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> getUserByUUID(
-			@Param(value = "User id to get user object with") @PathVariable UUID id) throws ResourceNotFoundException {
-		return ResponseEntity.ok(userService.findUserByUuidResponse(id));
+			@Parameter(description ="User uuid to get user object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
+		return ResponseEntity.ok(userService.findUserByUuidResponse(uuid));
 	}
 
 	@Operation(summary = "Update an existing user")
@@ -101,9 +101,9 @@ public class UserController {
 			@ApiResponse(responseCode  = "400", description = "Client Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class))),
 			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
-	@GetMapping(value = "/{id}/workspaces", produces={"application/json"})
+	@GetMapping(value = "/{uuid}/workspaces", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<WorkspaceDto>> getUserWorkspaces(
-			@RequestParam(value = "UUID of user to get workspaces for") @PathVariable UUID uuid) throws ResourceNotFoundException {
+			@Parameter(description = "UUID of user to get workspaces for") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.getAllWorkspacesForUserUuidResponse(uuid));
 	}
 
@@ -113,9 +113,9 @@ public class UserController {
 			@ApiResponse(responseCode  = "400", description = "Client Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class))),
 			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
-	@DeleteMapping(value = "/{id}", produces={"application/json"})
+	@DeleteMapping(value = "/{uuid}", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> deleteUser(
-			@RequestParam(value = "UUID of user to delete") @PathVariable UUID uuid) throws ResourceNotFoundException {
+			@Parameter(description = "UUID of user to delete") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.deleteUserResponse(uuid));
 	}
 

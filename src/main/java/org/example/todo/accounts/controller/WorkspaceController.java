@@ -1,6 +1,7 @@
 package org.example.todo.accounts.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -56,9 +57,9 @@ public class WorkspaceController {
 			@ApiResponse(responseCode  = "400", description = "Client Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class))),
 			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
-	@GetMapping(value = "/{id}/users", produces={"application/json"})
+	@GetMapping(value = "/{uuid}/users", produces={"application/json"})
 	public ResponseEntity<ResponseContainer<UserDto>> getUsersInWorkspace(
-			@RequestParam(value = "UUID of workspace to get all users for") @PathVariable UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+			@Parameter(description = "UUID of workspace to get all users for") @PathVariable UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
 		return ResponseEntity.ok(userService.getAllUsersInWorkspaceResponse(uuid));
 	}
 
