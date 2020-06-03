@@ -183,6 +183,11 @@ public class UserService {
 		}
 	}
 
+	@Transactional
+	public ResponseContainer<UserDto> updateUserResponse(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
+		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(updateUser(userUpdate)), UserDto.class);
+	}
+
 	public Set<User> getAllUsersInWorkspace(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
 		if (Objects.nonNull(uuid)) {
 			//Attempt to find workspace or else throw from workspaceService
@@ -198,10 +203,6 @@ public class UserService {
 		return ResponseUtils.pageToDtoResponseContainer(new ArrayList<>(getAllUsersInWorkspace(uuid)), UserDto.class);
 	}
 
-	@Transactional
-	public ResponseContainer<UserDto> updateUserResponse(UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
-		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(updateUser(userUpdate)), UserDto.class);
-	}
 
 	@Transactional(readOnly = true)
 	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) throws ResourceNotFoundException {
