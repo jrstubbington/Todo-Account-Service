@@ -1,7 +1,12 @@
 package org.example.todo.accounts.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.todo.accounts.dto.AccountCreationRequest;
+import org.example.todo.accounts.dto.JobProcessResponse;
 import org.example.todo.accounts.model.Login;
 import org.example.todo.accounts.model.Membership;
 import org.example.todo.accounts.model.User;
@@ -20,12 +25,26 @@ import org.example.todo.common.kafka.KafkaProducer;
 import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.ResponseUtils;
 import org.example.todo.common.util.Status;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -264,5 +283,51 @@ public class UserService {
 	@Autowired
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
+	}
+
+	@Autowired
+	private JobLauncher jobLauncher;
+
+	@Autowired
+	private @Qualifier("excelFileToDatabaseJob") Job job;
+
+	public JobProcessResponse batchUpload(String fileLocation) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, IOException, ImproperResourceSpecification {
+		JobParametersBuilder jobBuilder= new JobParametersBuilder();
+		jobBuilder.addString("fileLocation", fileLocation);
+		jobBuilder.addString("timestamp", OffsetDateTime.now().toString());
+		JobParameters jobParameters = jobBuilder.toJobParameters();
+
+		try (Workbook workbook = new XSSFWorkbook(new File(fileLocation))) {
+			//File format is correct
+			log.trace("Uploaded file format is a valid Excel file");
+		}
+		catch (NotOfficeXmlFileException | InvalidFormatException e) {
+			log.trace("Error thrown while trying to verify file format", e);
+			throw new ImproperResourceSpecification("Specified file is not an Excel File");
+		}
+
+		JobExecution jobExecution = jobLauncher.run(job, jobParameters); //TODO: runs synchronously, investigate asynchronous run
+		if (jobExecution.getStatus().isUnsuccessful()) {
+			throw new ResourceNotFoundException("Failed to complete job"); //TODO: CREATE FAILED JOB EXCEPTION
+		}
+		log.debug("{} items processed", afterJob(jobExecution));
+		return afterJob(jobExecution);
+	}
+
+	public JobProcessResponse afterJob(JobExecution jobExecution) {
+		int itemsRead = 0;
+		int itemsProcessed = 0;
+		int itemsSkipped = 0;
+		for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+			itemsRead += stepExecution.getReadCount();
+			itemsProcessed += stepExecution.getWriteCount();
+			itemsSkipped += stepExecution.getFilterCount();
+			log.trace("{}", stepExecution.toString());
+		}
+		JobProcessResponse jobProcessResponse = new JobProcessResponse();
+		jobProcessResponse.setRead(itemsRead);
+		jobProcessResponse.setProcessed(itemsProcessed);
+		jobProcessResponse.setSkipped(itemsSkipped);
+		return jobProcessResponse;
 	}
 }

@@ -19,4 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Set<User> findDistinctByMemberships_workspaceUuid(UUID uuid);
 
+	Optional<User> findByUserProfile_Email(String email);
+
+	boolean existsByUserProfile_Email(String email);
+
 }

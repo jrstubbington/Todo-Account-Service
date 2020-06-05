@@ -27,6 +27,16 @@ spring:
         # Hibernate ddl auto (create, create-drop, validate, update)
         ddl-auto: validate
 
+  batch:
+    job:
+    # Disable autostart for spring batch job
+      enabled: false
+    # Allow spring batch to create schema necessary for
+    initialize-schema: always
+
+upload:
+  path: #Set via env parameter
+
 server:
   shutdown: graceful
   http2:
@@ -66,7 +76,7 @@ logging:
   level:
     root: ERROR
     org:
-      example: TRACE
+      example: DEBUG
       apache:
         catalina: WARN
         coyote: WARN

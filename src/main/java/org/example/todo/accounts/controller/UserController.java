@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.example.todo.accounts.dto.AccountCreationRequest;
+import org.example.todo.accounts.dto.JobProcessResponse;
+import org.example.todo.accounts.service.StorageService;
 import org.example.todo.accounts.service.UserService;
 import org.example.todo.common.dto.UserDto;
 import org.example.todo.common.dto.WorkspaceDto;
@@ -18,9 +20,14 @@ import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.verification.group.Create;
 import org.example.todo.common.util.verification.group.Update;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -32,9 +39,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -45,6 +55,9 @@ import java.util.UUID;
 public class UserController {
 
 	private UserService userService;
+
+	@Autowired //TODO: autowire setter
+	private StorageService storageService;
 
 	@Operation(summary = "View a list of available users")
 	@ApiResponses(value = {
@@ -117,6 +130,26 @@ public class UserController {
 	public ResponseEntity<ResponseContainer<UserDto>> deleteUser(
 			@Parameter(description = "UUID of user to delete") @PathVariable UUID uuid) throws ResourceNotFoundException {
 		return ResponseEntity.ok(userService.deleteUserResponse(uuid));
+	}
+
+	@Operation(summary = "Upload Excel File of Users")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode  = "200", description = "OK"),
+			@ApiResponse(responseCode  = "400", description = "Client Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class))),
+			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
+	})
+	@PostMapping(path = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<JobProcessResponse> uploadFile(@RequestPart(required = true) MultipartFile file) throws IOException, JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, ImproperResourceSpecification {
+		String savedFileLocation = storageService.uploadFile(file);
+		JobProcessResponse jobProcessResponse;
+		try {
+			jobProcessResponse = userService.batchUpload(savedFileLocation);
+		}
+		finally {
+			storageService.deleteFile(savedFileLocation);
+		}
+		jobProcessResponse.setMessage("Done!");
+		return ResponseEntity.ok(jobProcessResponse);
 	}
 
 	@Autowired
