@@ -3,18 +3,25 @@ package org.example.todo.accounts.batch;
 import lombok.extern.slf4j.Slf4j;
 import org.example.todo.accounts.model.User;
 import org.example.todo.accounts.model.UserProfile;
-import org.example.todo.accounts.repository.UserRepository;
+import org.example.todo.accounts.repository.UserProfileRepository;
 import org.example.todo.common.dto.UserDto;
 import org.example.todo.common.dto.UserProfileDto;
 import org.example.todo.common.util.Status;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
+
+import javax.validation.ConstraintViolation;
+import java.util.Set;
 
 @Slf4j
 public class UserProcessor implements ItemProcessor<UserDto, User> {
 
 	@Autowired //TODO: Create autowired setter
-	private UserRepository userRepository;
+	private UserProfileRepository userProfileRepository;
+
+	@Autowired
+	private SpringValidatorAdapter validator;
 
 	@Override
 	public User process(UserDto item) throws Exception {
@@ -26,7 +33,8 @@ public class UserProcessor implements ItemProcessor<UserDto, User> {
 		//TODO: Add functionality for creating temporary logins
 		//TODO: Add functionality for assigning to workspace(s) with role(s)
 
-		if (userRepository.existsByUserProfile_Email(userProfileDto.getEmail())) {
+		//Instead of doing this, push everything into a staging table and execute updates/inserts via a stored procedure
+		if (userProfileRepository.existsByEmail(userProfileDto.getEmail())) {
 			log.warn("User with email {} already exists", userProfileDto.getEmail());
 			//User already exists... or there's an email conflict :(
 			//NOTE: there should be some limitation on who can edit who's profile, memberships, roles.
@@ -43,6 +51,13 @@ public class UserProcessor implements ItemProcessor<UserDto, User> {
 				.build();
 		user.setUserProfile(userProfile);
 		user.setStatus(Status.ACTIVE);
+
+		Set<ConstraintViolation<User>> userViolations = validator.validate(user);
+		Set<ConstraintViolation<UserProfile>> profileViolations = validator.validate(userProfile);
+//		log.info("{} violoations", userViolations.size() + profileViolations.size());
+		if (!userViolations.isEmpty() || !profileViolations.isEmpty()) {
+			return null;
+		}
 		return user;
 	}
 }

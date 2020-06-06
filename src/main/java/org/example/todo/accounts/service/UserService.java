@@ -291,7 +291,7 @@ public class UserService {
 	@Autowired
 	private @Qualifier("excelFileToDatabaseJob") Job job;
 
-	public JobProcessResponse batchUpload(String fileLocation) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, IOException, ImproperResourceSpecification {
+	public JobProcessResponse batchUpload(String fileLocation) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, IOException, ImproperResourceSpecification, InterruptedException {
 		JobParametersBuilder jobBuilder= new JobParametersBuilder();
 		jobBuilder.addString("fileLocation", fileLocation);
 		jobBuilder.addString("timestamp", OffsetDateTime.now().toString());
@@ -305,6 +305,46 @@ public class UserService {
 			log.trace("Error thrown while trying to verify file format", e);
 			throw new ImproperResourceSpecification("Specified file is not an Excel File");
 		}
+//		StopWatch stopwatch = new StopWatch();
+//		stopwatch.start();
+//		new ReportSplitter(fileLocation, 1000);
+//		stopwatch.stop();
+//		log.info("Splitting report took {}", stopwatch.getTotalTimeSeconds());
+
+/*		ExecutorService es = Executors.newCachedThreadPool();
+
+		for (int i = 0; i < 11; i++) {
+			String newFileName = fileLocation.substring(0, fileLocation.length() - 5);
+			String splitFile = newFileName + "_" + (i + 1) + ".xlsx";
+
+			JobParametersBuilder jobBuilder= new JobParametersBuilder();
+			jobBuilder.addString("fileLocation", splitFile);
+			jobBuilder.addString("timestamp", OffsetDateTime.now().toString());
+			JobParameters jobParameters = jobBuilder.toJobParameters();
+
+
+			log.info("Executing task {} for file", i, splitFile);
+			*//*  your task *//*
+			es.execute(() -> {
+				try {
+					jobLauncher.run(job, jobParameters);
+				} catch (JobExecutionAlreadyRunningException e) {
+					e.printStackTrace();
+				} catch (JobRestartException e) {
+					e.printStackTrace();
+				} catch (JobInstanceAlreadyCompleteException e) {
+					e.printStackTrace();
+				} catch (JobParametersInvalidException e) {
+					e.printStackTrace();
+				}
+			});
+			log.info("Finished task request {} for file {}", i, splitFile);
+//			if (jobExecution.getStatus().isUnsuccessful()) {
+//				throw new ResourceNotFoundException("Failed to complete job"); //TODO: CREATE FAILED JOB EXCEPTION
+//			}
+		}
+		boolean finished = es.awaitTermination(999, TimeUnit.HOURS);*/
+
 
 		JobExecution jobExecution = jobLauncher.run(job, jobParameters); //TODO: runs synchronously, investigate asynchronous run
 		if (jobExecution.getStatus().isUnsuccessful()) {

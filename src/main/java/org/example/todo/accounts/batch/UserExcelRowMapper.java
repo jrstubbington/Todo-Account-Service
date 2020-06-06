@@ -8,7 +8,7 @@ import org.springframework.batch.item.excel.RowMapper;
 import org.springframework.batch.item.excel.support.rowset.RowSet;
 
 @Slf4j
-public class UserExcelRowMapper implements RowMapper<UserDto> {
+public class UserExcelRowMapper implements RowMapper<UserDto>  {
 
 	@Override
 	public UserDto mapRow(RowSet rowSet) {

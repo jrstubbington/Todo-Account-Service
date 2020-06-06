@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -140,15 +141,20 @@ public class UserController {
 	})
 	@PostMapping(path = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<JobProcessResponse> uploadFile(@RequestPart(required = true) MultipartFile file) throws IOException, JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, ImproperResourceSpecification {
+		StopWatch stopwatch = new StopWatch();
+		stopwatch.start();
 		String savedFileLocation = storageService.uploadFile(file);
-		JobProcessResponse jobProcessResponse;
+		JobProcessResponse jobProcessResponse = new JobProcessResponse();
 		try {
 			jobProcessResponse = userService.batchUpload(savedFileLocation);
-		}
-		finally {
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
 			storageService.deleteFile(savedFileLocation);
 		}
 		jobProcessResponse.setMessage("Done!");
+		stopwatch.stop();
+		log.info("Processing report took {}", stopwatch.getTotalTimeSeconds());
 		return ResponseEntity.ok(jobProcessResponse);
 	}
 

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.TaskExecutor;
 
 import java.nio.file.Paths;
 
@@ -30,7 +31,7 @@ import java.nio.file.Paths;
 @Slf4j
 public class ExcelFileToDatabaseJobConfig {
 
-	private static final int BATCH_PROCESSING_SIZE = 10; //TODO: set via properties file
+	private static final int BATCH_PROCESSING_SIZE = 2000; //TODO: set via properties file
 
 	@Bean
 	@StepScope
@@ -40,12 +41,14 @@ public class ExcelFileToDatabaseJobConfig {
 		reader.setLinesToSkip(1);
 		reader.setResource(new FileSystemResource(Paths.get(fileLocation)));
 		reader.setRowMapper(excelRowMapper());
+		reader.setStrict(true);
 		reader.afterPropertiesSet();
 		reader.open(new ExecutionContext());
 		return reader;
 	}
 
-	private static RowMapper<UserDto> excelRowMapper() {
+	@StepScope
+	private RowMapper<UserDto> excelRowMapper() {
 		return new UserExcelRowMapper();
 	}
 
@@ -58,23 +61,32 @@ public class ExcelFileToDatabaseJobConfig {
 	ItemWriter<User> excelUserWriter() {
 		return new UserWriter();
 	}
+//	@Bean
+//	public TaskExecutor taskExecutor() {
+//		SimpleAsyncTaskExecutor simpleAsyncTaskExecutor = new SimpleAsyncTaskExecutor();
+//		simpleAsyncTaskExecutor.setConcurrencyLimit(4);
+//		return simpleAsyncTaskExecutor;
+//	}
 
 	@Bean
 	Step excelFileToDatabaseStep(ItemReader<UserDto> excelUserReader,
 	                             ItemProcessor<UserDto, User> excelUserProcessor,
 	                             ItemWriter<User> excelUserWriter,
-	                             StepBuilderFactory stepBuilderFactory) {
+	                             StepBuilderFactory stepBuilderFactory,
+	                             TaskExecutor taskExecutor) {
 		return stepBuilderFactory.get("excelFileToDatabaseStep")
 				.<UserDto, User>chunk(BATCH_PROCESSING_SIZE)
 				.reader(excelUserReader)
 				.processor(excelUserProcessor)
 				.writer(excelUserWriter)
+//				.taskExecutor(taskExecutor)
 				.build();
 	}
 
 	@Bean
 	Job excelFileToDatabaseJob(JobBuilderFactory jobBuilderFactory,
-	                           @Qualifier("excelFileToDatabaseStep") Step excelUserStep) {
+	                           @Qualifier("excelFileToDatabaseStep") Step excelUserStep,
+	                           TaskExecutor taskExecutor) {
 		return jobBuilderFactory.get("excelFileToDatabaseJob")
 				.incrementer(new RunIdIncrementer())
 				.flow(excelUserStep)

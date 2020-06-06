@@ -18,9 +18,9 @@ public class UserWriter implements ItemWriter<User> {
 	public void write(List<? extends User> users) throws Exception {
 		log.info("Received the information of {} users", users.size());
 
-		users.forEach(i -> log.debug("Received the information of a user: {}", i));
+//		users.forEach(i -> log.debug("Received the information of a user: {}", i));
 
-
-		userRepository.saveAll(users);
+		userRepository.saveInBatch(users); //this is suppose to be faster, but it's marginally slower :|
+//		userRepository.saveAll(users);
 	}
 }

@@ -13,25 +13,38 @@ spring:
     url:
     username:
     password:
+#    auto-commit: false
+#    hikari:
+#      maximum-pool-size: 100
+#      max-active: 80
+#      max-idle: 10
 
   jpa:
     show-sql: false
-    generate-ddl: false
+    generate-ddl: true
+    open-in-view: false
     properties:
       ## Hibernate Properties
       hibernate:
+        generate_statistics: true
         enable_lazy_load_no_trans: false
         format_sql: true
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
         ## This is important
         # Hibernate ddl auto (create, create-drop, validate, update)
-        ddl-auto: validate
+        cache:
+          use_second_level_cache: false
+        ddl-auto: create
+        jdbc:
+          batch_size: 100 #suppose to be between 5 and 30... but it runs faster if it's higher?
+        order_inserts: true
+        order_updates: true
 
   batch:
     job:
     # Disable autostart for spring batch job
       enabled: false
-    # Allow spring batch to create schema necessary for
+    # Allow spring batch to create schema necessary
     initialize-schema: always
 
 upload:
@@ -74,7 +87,7 @@ kafka:
 logging:
   config: classpath:log4j2-json.xml
   level:
-    root: ERROR
+    root: WARN
     org:
       example: DEBUG
       apache:

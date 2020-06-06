@@ -24,7 +24,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -41,7 +43,9 @@ import java.util.UUID;
 public class User implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userSeqGen")
+	@SequenceGenerator(name = "userSeqGen", sequenceName = "userSeqGen", initialValue = 1, allocationSize = 100)
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Type(type="uuid-binary")
@@ -80,4 +84,7 @@ public class User implements Serializable {
 	@EqualsAndHashCode.Exclude
 	@JsonIgnore
 	private Login login;
+
+	@Version
+	private Short version;
 }
