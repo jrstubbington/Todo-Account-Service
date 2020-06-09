@@ -20,10 +20,6 @@ import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.verification.group.Create;
 import org.example.todo.common.util.verification.group.Update;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -45,7 +41,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @RestController
@@ -140,18 +138,12 @@ public class UserController {
 			@ApiResponse(responseCode  = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
 	})
 	@PostMapping(path = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<JobProcessResponse> uploadFile(@RequestPart(required = true) MultipartFile file) throws IOException, JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, ImproperResourceSpecification {
+	public ResponseEntity<JobProcessResponse> uploadFile(@RequestPart(required = true) MultipartFile file) throws IOException, ImproperResourceSpecification {
 		StopWatch stopwatch = new StopWatch();
 		stopwatch.start();
-		String savedFileLocation = storageService.uploadFile(file);
-		JobProcessResponse jobProcessResponse = new JobProcessResponse();
-		try {
-			jobProcessResponse = userService.batchUpload(savedFileLocation);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			storageService.deleteFile(savedFileLocation);
-		}
+		InputStream inputStream =  new BufferedInputStream(file.getInputStream()); //TODO convert back to file to avoid large memory spikes
+		JobProcessResponse jobProcessResponse = userService.batchUpload(inputStream);
+		inputStream.close();
 		jobProcessResponse.setMessage("Done!");
 		stopwatch.stop();
 		log.info("Processing report took {}", stopwatch.getTotalTimeSeconds());

@@ -13,7 +13,7 @@ spring:
     url:
     username:
     password:
-#    auto-commit: false
+    auto-commit: false
 #    hikari:
 #      maximum-pool-size: 100
 #      max-active: 80
@@ -36,7 +36,7 @@ spring:
           use_second_level_cache: false
         ddl-auto: create
         jdbc:
-          batch_size: 100 #suppose to be between 5 and 30... but it runs faster if it's higher?
+          batch_size: 500 #suppose to be between 5 and 30... but it runs faster if it's higher?
         order_inserts: true
         order_updates: true
 
@@ -46,6 +46,11 @@ spring:
       enabled: false
     # Allow spring batch to create schema necessary
     initialize-schema: always
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
 
 upload:
   path: #Set via env parameter

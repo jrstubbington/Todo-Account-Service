@@ -1,8 +1,9 @@
 package org.example.todo.accounts.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.todo.accounts.dto.AccountCreationRequest;
@@ -13,6 +14,7 @@ import org.example.todo.accounts.model.User;
 import org.example.todo.accounts.model.UserProfile;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.MembershipRepository;
+import org.example.todo.accounts.repository.UserProfileRepository;
 import org.example.todo.accounts.repository.UserRepository;
 import org.example.todo.common.dto.LoginDto;
 import org.example.todo.common.dto.UserDto;
@@ -25,26 +27,17 @@ import org.example.todo.common.kafka.KafkaProducer;
 import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.ResponseUtils;
 import org.example.todo.common.util.Status;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
-import java.io.File;
+import javax.validation.ConstraintViolation;
 import java.io.IOException;
-import java.time.OffsetDateTime;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,6 +63,11 @@ public class UserService {
 	private PasswordEncoder passwordEncoder;
 
 	private KafkaProducer<UserDto> kafkaProducer;
+
+	private UserProfileRepository userProfileRepository;
+
+	@Autowired
+	private SpringValidatorAdapter validator;
 
 	//TODO: Enable filtering and sorting
 	public List<User> getAllUsers() {
@@ -286,88 +284,53 @@ public class UserService {
 	}
 
 	@Autowired
-	private JobLauncher jobLauncher;
+	public void setUserProfileRepository(UserProfileRepository userProfileRepository) {
+		this.userProfileRepository = userProfileRepository;
+	}
 
-	@Autowired
-	private @Qualifier("excelFileToDatabaseJob") Job job;
-
-	public JobProcessResponse batchUpload(String fileLocation) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, ResourceNotFoundException, IOException, ImproperResourceSpecification, InterruptedException {
-		JobParametersBuilder jobBuilder= new JobParametersBuilder();
-		jobBuilder.addString("fileLocation", fileLocation);
-		jobBuilder.addString("timestamp", OffsetDateTime.now().toString());
-		JobParameters jobParameters = jobBuilder.toJobParameters();
-
-		try (Workbook workbook = new XSSFWorkbook(new File(fileLocation))) {
+	public JobProcessResponse batchUpload(InputStream inputStream) throws ImproperResourceSpecification {
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			//File format is correct
 			log.trace("Uploaded file format is a valid Excel file");
+			List<User> users = new ArrayList<>();
+			Sheet sheet = workbook.getSheetAt(0);
+			for (Row row : sheet) {
+				User user = new User();
+				if (row.getRowNum() == 0) {
+					continue;
+				}
+				UserProfile userProfile = UserProfile.builder()
+						.firstName(row.getCell(0).getStringCellValue())
+						.lastName(row.getCell(1).getStringCellValue())
+						.email(row.getCell(2).getStringCellValue())
+						.build();
+//				if (userProfileRepository.existsByEmail(userProfile.getEmail())) { //do this in the database
+//					log.warn("user already exists");
+//					continue;
+//				}
+				user.setUserProfile(userProfile);
+				users.add(user);
+				user.setStatus(Status.ACTIVE);
+				Set<ConstraintViolation<User>> userViolations = validator.validate(user);
+				Set<ConstraintViolation<UserProfile>> profileViolations = validator.validate(userProfile);
+//        log.info("{} violoations", userViolations.size() + profileViolations.size());
+				if (!userViolations.isEmpty() || !profileViolations.isEmpty()) {
+					return null;
+				}
+				if (users.size() >= 2000 || row.getRowNum() == sheet.getPhysicalNumberOfRows()-1) {
+					StopWatch stopWatch = new StopWatch();
+					stopWatch.start();
+					userRepository.saveAll(users);
+					stopWatch.stop();
+					log.info("SAVED {} entities in {} seconds", users.size(), stopWatch.getTotalTimeSeconds());
+					users = new ArrayList<>();
+				}
+			}
 		}
-		catch (NotOfficeXmlFileException | InvalidFormatException e) {
+		catch (NotOfficeXmlFileException | IOException e) {
 			log.trace("Error thrown while trying to verify file format", e);
 			throw new ImproperResourceSpecification("Specified file is not an Excel File");
 		}
-//		StopWatch stopwatch = new StopWatch();
-//		stopwatch.start();
-//		new ReportSplitter(fileLocation, 1000);
-//		stopwatch.stop();
-//		log.info("Splitting report took {}", stopwatch.getTotalTimeSeconds());
-
-/*		ExecutorService es = Executors.newCachedThreadPool();
-
-		for (int i = 0; i < 11; i++) {
-			String newFileName = fileLocation.substring(0, fileLocation.length() - 5);
-			String splitFile = newFileName + "_" + (i + 1) + ".xlsx";
-
-			JobParametersBuilder jobBuilder= new JobParametersBuilder();
-			jobBuilder.addString("fileLocation", splitFile);
-			jobBuilder.addString("timestamp", OffsetDateTime.now().toString());
-			JobParameters jobParameters = jobBuilder.toJobParameters();
-
-
-			log.info("Executing task {} for file", i, splitFile);
-			*//*  your task *//*
-			es.execute(() -> {
-				try {
-					jobLauncher.run(job, jobParameters);
-				} catch (JobExecutionAlreadyRunningException e) {
-					e.printStackTrace();
-				} catch (JobRestartException e) {
-					e.printStackTrace();
-				} catch (JobInstanceAlreadyCompleteException e) {
-					e.printStackTrace();
-				} catch (JobParametersInvalidException e) {
-					e.printStackTrace();
-				}
-			});
-			log.info("Finished task request {} for file {}", i, splitFile);
-//			if (jobExecution.getStatus().isUnsuccessful()) {
-//				throw new ResourceNotFoundException("Failed to complete job"); //TODO: CREATE FAILED JOB EXCEPTION
-//			}
-		}
-		boolean finished = es.awaitTermination(999, TimeUnit.HOURS);*/
-
-
-		JobExecution jobExecution = jobLauncher.run(job, jobParameters); //TODO: runs synchronously, investigate asynchronous run
-		if (jobExecution.getStatus().isUnsuccessful()) {
-			throw new ResourceNotFoundException("Failed to complete job"); //TODO: CREATE FAILED JOB EXCEPTION
-		}
-		log.debug("{} items processed", afterJob(jobExecution));
-		return afterJob(jobExecution);
-	}
-
-	public JobProcessResponse afterJob(JobExecution jobExecution) {
-		int itemsRead = 0;
-		int itemsProcessed = 0;
-		int itemsSkipped = 0;
-		for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-			itemsRead += stepExecution.getReadCount();
-			itemsProcessed += stepExecution.getWriteCount();
-			itemsSkipped += stepExecution.getFilterCount();
-			log.trace("{}", stepExecution.toString());
-		}
-		JobProcessResponse jobProcessResponse = new JobProcessResponse();
-		jobProcessResponse.setRead(itemsRead);
-		jobProcessResponse.setProcessed(itemsProcessed);
-		jobProcessResponse.setSkipped(itemsSkipped);
-		return jobProcessResponse;
+		return new JobProcessResponse();
 	}
 }

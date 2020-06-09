@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.todo.accounts.exceptions.StorageException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,6 +23,8 @@ public class StorageService {
 
 	public String uploadFile(MultipartFile file) {
 
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 		if (file.isEmpty()) {
 			throw new StorageException("Failed to store empty file");
 		}
@@ -34,6 +37,9 @@ public class StorageService {
 			Files.copy(is, Paths.get(path + fileName),
 					StandardCopyOption.REPLACE_EXISTING);
 
+			stopWatch.stop();
+			log.info("Saving file {} took {}", file.getOriginalFilename(), stopWatch.getTotalTimeSeconds());
+
 			return path + fileName;
 		}
 		catch (IOException e) {
@@ -42,6 +48,7 @@ public class StorageService {
 
 			throw new StorageException(msg, e);
 		}
+
 	}
 
 	public void deleteFile(String fileLocation) throws IOException {
