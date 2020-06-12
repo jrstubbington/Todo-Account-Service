@@ -39,7 +39,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class User implements Serializable {
 
 	@Id

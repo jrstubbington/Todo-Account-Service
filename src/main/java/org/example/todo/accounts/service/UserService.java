@@ -78,15 +78,17 @@ public class UserService {
 	public ResponseContainer<UserDto> getAllUsersResponse(PageRequest pageRequest) {
 		return ResponseUtils.pageToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class);
 	}
-
+	@Transactional
 	public User findUserByUuid(UUID uuid) throws ResourceNotFoundException {
 		return userRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %s", uuid)));
 	}
 
+	@Transactional
 	public ResponseContainer<UserDto> findUserByUuidResponse(UUID uuid) throws ResourceNotFoundException {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(findUserByUuid(uuid)), UserDto.class);
 	}
 
+	//TODO: Return an AccountCreationRequest here instead of a user
 	@Transactional
 	public User createUser(AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
 		UserDto userDto = accountCreationRequest.getUser();

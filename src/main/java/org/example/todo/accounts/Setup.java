@@ -160,11 +160,11 @@ public class Setup {
 			}
 			catch (DataIntegrityViolationException e) {
 				log.error("Failed to add duplicate data");
-				throw e;
+//				throw e;
 			}
 			catch (Exception e) {
 				log.error("Failed to fully add test data.", e);
-				throw e;
+//				throw e;
 			}
 
 			// fetch all customers

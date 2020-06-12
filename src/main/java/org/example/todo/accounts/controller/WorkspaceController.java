@@ -63,6 +63,17 @@ public class WorkspaceController {
 		return ResponseEntity.ok(userService.getAllUsersInWorkspaceResponse(uuid));
 	}
 
+	@Operation(summary = "Get a specific workspace's information")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "OK"),
+			@ApiResponse(responseCode  = "500", description = "Internal error has occurred", content = @Content(schema = @Schema(implementation = ErrorDetails.class)))
+	})
+	@GetMapping(value = "/{uuid}", produces={"application/json"})
+	public ResponseEntity<ResponseContainer<WorkspaceDto>> getUserByUUID(
+			@Parameter(description ="Workspace uuid to get workspace object with") @PathVariable UUID uuid) throws ResourceNotFoundException {
+		return ResponseEntity.ok(workspaceService.findWorkspaceByUuidResponse(uuid));
+	}
+
 	@Autowired
 	public void setWorkspaceService(WorkspaceService workspaceService) {
 		this.workspaceService = workspaceService;

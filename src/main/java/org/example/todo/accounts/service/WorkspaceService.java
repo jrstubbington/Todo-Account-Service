@@ -35,10 +35,12 @@ public class WorkspaceService {
 		return workspaceRepository.findAll(pageRequest);
 	}
 
+	@Transactional
 	public Workspace findWorkspaceByUuid(UUID uuid) throws ResourceNotFoundException {
 		return workspaceRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("Workspace not found with id: %s", uuid)));
 	}
 
+	@Transactional
 	public ResponseContainer<WorkspaceDto> findWorkspaceByUuidResponse(UUID uuid) throws ResourceNotFoundException {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(findWorkspaceByUuid(uuid)), WorkspaceDto.class);
 	}
