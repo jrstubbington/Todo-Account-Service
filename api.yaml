@@ -1,0 +1,503 @@
+openapi: 3.0.1
+info:
+  title: Account Management API
+  description: Service for managing identity and roles
+  contact:
+    name: James Stubbington
+    url: 'https://github.com/jrstubbington'
+    email: jamesrstubbington@gmail.com
+  license:
+    name: 'License: MIT'
+    url: 'https://github.com/jrstubbington/Todo-Account-Service/blob/master/LICENSE'
+  version: 1.0-SNAPSHOT
+servers:
+  - url: 'http://localhost:8081'
+    description: Generated server url
+tags:
+  - name: Workspace Management
+    description: A collection of APIs designed to handle functions related to workspace management
+  - name: User Management
+    description: A collection of APIs designed to handle functions related to user management
+paths:
+  '/v1/users/{uuid}':
+    get:
+      tags:
+        - User Management
+      summary: Get a specific user's information
+      operationId: getUserByUUID
+      parameters:
+        - name: uuid
+          in: path
+          description: User uuid to get user object with
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '500':
+          description: Internal error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+    delete:
+      tags:
+        - User Management
+      summary: Delete the specified user
+      operationId: deleteUser
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of user to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  '/v1/users/{uuid}/workspaces':
+    get:
+      tags:
+        - User Management
+      summary: Get the specified user's available workspaces
+      operationId: getUserWorkspaces
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of user to get workspaces for
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerWorkspaceDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /v1/users/:
+    get:
+      tags:
+        - User Management
+      summary: View a list of available users
+      operationId: getUsersV1
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '500':
+          description: Internal error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+    put:
+      tags:
+        - User Management
+      summary: Update an existing user
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+    post:
+      tags:
+        - User Management
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreationRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /v1/users/batch:
+    post:
+      tags:
+        - User Management
+      summary: Upload Excel File of Users
+      operationId: uploadFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JobProcessResponse'
+        '400':
+          description: Client Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  '/v1/workspaces/{uuid}':
+    get:
+      tags:
+        - Workspace Management
+      summary: Get a workspace by its UUID
+      operationId: getWorkspaceByUUID
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID to find workspace with
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerWorkspaceDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  '/v1/workspaces/{uuid}/users':
+    get:
+      tags:
+        - Workspace Management
+      summary: Get a list of users belonging to a workspace
+      operationId: getUsersInWorkspace
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of workspace to get all users for
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerUserDto'
+        '400':
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /v1/workspaces/:
+    get:
+      tags:
+        - Workspace Management
+      summary: View a list of available workspaces
+      operationId: getWorkspacesV1
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseContainerWorkspaceDto'
+        '500':
+          description: Internal error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+components:
+  schemas:
+    ErrorDetails:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        requestInformation:
+          type: string
+        errorCode:
+          type: string
+        moreInfo:
+          type: string
+    ResponseContainerUserDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusDescription:
+          type: string
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        type:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+    UserDto:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - DELETED
+        userProfile:
+          $ref: '#/components/schemas/UserProfileDto'
+        dateCreated:
+          type: string
+          format: date-time
+          readOnly: true
+    UserProfileDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    ResponseContainerWorkspaceDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusDescription:
+          type: string
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+        pageSize:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        type:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceDto'
+    WorkspaceDto:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - DELETED
+        workspaceType:
+          type: integer
+          format: int32
+        dateCreated:
+          type: string
+          format: date-time
+          readOnly: true
+    AccountCreationRequest:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserDto'
+        workspace:
+          $ref: '#/components/schemas/WorkspaceDto'
+        login:
+          $ref: '#/components/schemas/LoginDto'
+    LoginDto:
+      type: object
+      properties:
+        username:
+          type: string
+        plainTextPassword:
+          type: string
+          writeOnly: true
+    JobProcessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        read:
+          type: integer
+          format: int32
+        processed:
+          type: integer
+          format: int32
+        skipped:
+          type: integer
+          format: int32
+        errored:
+          type: integer
+          format: int32

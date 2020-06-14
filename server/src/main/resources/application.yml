@@ -1,0 +1,107 @@
+spring:
+  main:
+    banner-mode: off
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  #  http:
+#    converters:
+#      preferred-json-mapper: gson
+
+  ## Spring Datasource passed in via environment variables
+  datasource:
+    url:
+    username:
+    password:
+    auto-commit: false
+#    hikari:
+#      maximum-pool-size: 100
+#      max-active: 80
+#      max-idle: 10
+
+  jpa:
+    show-sql: false
+    generate-ddl: true
+    open-in-view: false
+    properties:
+      ## Hibernate Properties
+      hibernate:
+        generate_statistics: true
+        enable_lazy_load_no_trans: false
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        ## This is important
+        # Hibernate ddl auto (create, create-drop, validate, update)
+        cache:
+          use_second_level_cache: false
+        ddl-auto: create
+        jdbc:
+          batch_size: 500 #suppose to be between 5 and 30... but it runs faster if it's higher?
+        order_inserts: true
+        order_updates: true
+
+  batch:
+    job:
+    # Disable autostart for spring batch job
+      enabled: false
+    # Allow spring batch to create schema necessary
+    initialize-schema: always
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+upload:
+  path: #Set via env parameter
+
+server:
+  shutdown: graceful
+  http2:
+  # Enable HTTP/2 support, if the current environment supports it
+    enabled: true
+  compression:
+  # Enable response compression
+    enabled: true
+  # The comma-separated list of mime types that should be compressed
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+  # Compress the response only if the response size is at least 1KB
+    min-response-size: 1024
+
+#springdoc:
+#  show-actuator: true
+#  swagger-ui:
+#    doc-expansion: none
+#    operationsSorter: method
+#    tagsSorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+flyway:
+  enabled: true
+  baselineOnMigrate: false
+
+kafka:
+  bootstrapAddress: #set via env parameter
+  groupId: account-service
+
+logging:
+  config: classpath:log4j2.xml
+  level:
+    root: WARN
+    org:
+      example: DEBUG
+      apache:
+        catalina: WARN
+        coyote: WARN
+      springframework: WARN
+
+project:
+  package: ^project.groupId^
+  version: ^project.version^
+  name: ^project.artifactId^
+  description: ^project.description^
