@@ -2,13 +2,12 @@ package org.example.todo.accounts.controller;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.example.todo.accounts.dto.ResponseContainerUserDto;
-import org.example.todo.accounts.dto.ResponseContainerWorkspaceDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.example.todo.accounts.generated.controller.WorkspaceManagementApi;
+import org.example.todo.accounts.generated.dto.ResponseContainerUserDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.service.UserService;
 import org.example.todo.accounts.service.WorkspaceService;
-import org.example.todo.common.exceptions.ImproperResourceSpecification;
-import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
-import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -32,22 +30,20 @@ public class WorkspaceController implements WorkspaceManagementApi {
 	private UserService userService;
 
 	@Override
-	public ResponseEntity<ResponseContainerUserDto> getUsersInWorkspace(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+	public ResponseEntity<ResponseContainerUserDto> getUsersInWorkspace(UUID uuid) {
 		return ResponseEntity.ok(userService.getAllUsersInWorkspaceResponse(uuid));
 	}
 
 	@Override
-	public ResponseEntity<ResponseContainerWorkspaceDto> getWorkspacesV1(@Valid Optional<Integer> page, @Valid Optional<Integer> pageSize) {
-//		ResponseContainerWorkspaceDto responseContainer = ResponseUtils.pageToDtoResponseContainer(workspaceService.getAllWorkspaces(PageRequest.of(page.orElse(0), pageSize.orElse(10))), WorkspaceDto.class);
-//		return ResponseEntity.ok(responseContainer);
-		ResponseContainer<WorkspaceDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(workspaceService.getAllWorkspaces(PageRequest.of(page.orElse(0), pageSize.orElse(10))), WorkspaceDto.class);
+	public ResponseEntity<ResponseContainerWorkspaceDto> getWorkspacesV1(@Valid Integer page, @Valid Integer pageSize) {
+		ResponseContainer<WorkspaceDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(workspaceService.getAllWorkspaces(PageRequest.of(page, pageSize)), WorkspaceDto.class);
 		ResponseContainerWorkspaceDto responseContainerWorkspaceDto = new ResponseContainerWorkspaceDto();
 		responseContainerWorkspaceDto.data(responseContainer.getData());
 		return ResponseEntity.ok(responseContainerWorkspaceDto);
 	}
 
 	@Override
-	public ResponseEntity<ResponseContainerWorkspaceDto> getWorkspaceByUUID(UUID uuid) throws ResourceNotFoundException {
+	public ResponseEntity<ResponseContainerWorkspaceDto> getWorkspaceByUUID(UUID uuid) {
 		return ResponseEntity.ok(workspaceService.findWorkspaceByUuidResponse(uuid));
 	}
 

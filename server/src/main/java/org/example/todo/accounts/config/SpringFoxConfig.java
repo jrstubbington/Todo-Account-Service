@@ -86,10 +86,13 @@ public class SpringFoxConfig {
 
 	@Bean
 	public Docket apiDocket() {
-		return new Docket(DocumentationType.SWAGGER_2).forCodeGeneration(false)
+		return new Docket(DocumentationType.SWAGGER_2)
+				.forCodeGeneration(false)
+				.useDefaultResponseMessages(false)
 				.select()
 				.apis(RequestHandlerSelectors.basePackage(packageName))
 				.paths(PathSelectors.any())
-				.build().apiInfo(getApiInfo());
+				.build()
+				.apiInfo(getApiInfo());
 	}
 }

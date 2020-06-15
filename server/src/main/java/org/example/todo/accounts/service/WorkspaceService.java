@@ -1,8 +1,8 @@
 package org.example.todo.accounts.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.todo.accounts.dto.ResponseContainerWorkspaceDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
@@ -39,12 +39,12 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public Workspace findWorkspaceByUuid(UUID uuid) throws ResourceNotFoundException {
+	public Workspace findWorkspaceByUuid(UUID uuid) {
 		return workspaceRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("Workspace not found with id: %s", uuid)));
 	}
 
 	@Transactional
-	public ResponseContainerWorkspaceDto findWorkspaceByUuidResponse(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainerWorkspaceDto findWorkspaceByUuidResponse(UUID uuid) {
 		ResponseContainerWorkspaceDto responseContainerWorkspaceDto = new ResponseContainerWorkspaceDto();
 		responseContainerWorkspaceDto.addDataItem(ResponseUtils.convertToDto(findWorkspaceByUuid(uuid), WorkspaceDto.class));
 		return responseContainerWorkspaceDto;
@@ -52,7 +52,7 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public Workspace createWorkspace(@Valid WorkspaceDto workspaceDto) throws ImproperResourceSpecification {
+	public Workspace createWorkspace(@Valid WorkspaceDto workspaceDto) {
 		if (Objects.isNull(workspaceDto.getUuid())) {
 			Workspace workspace = Workspace.builder()
 					.name(workspaceDto.getName())
@@ -72,7 +72,7 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public ResponseContainer<WorkspaceDto> createWorkspaceResponse(@Valid WorkspaceDto workspaceDto) throws ImproperResourceSpecification {
+	public ResponseContainer<WorkspaceDto> createWorkspaceResponse(@Valid WorkspaceDto workspaceDto) {
 		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createWorkspace(workspaceDto)), WorkspaceDto.class);
 	}
 

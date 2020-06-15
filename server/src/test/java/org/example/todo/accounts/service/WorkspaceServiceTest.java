@@ -1,7 +1,6 @@
 package org.example.todo.accounts.service;
 
-
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
@@ -80,6 +79,7 @@ class WorkspaceServiceTest {
 
 		WorkspaceDto workspaceDto = new WorkspaceDto();
 		workspaceDto.setUuid(workspace.getUuid());
+		workspaceDto.setWorkspaceType(0);
 
 		Optional<Workspace> optionalWorkspace = Optional.of(workspace);
 
@@ -114,9 +114,9 @@ class WorkspaceServiceTest {
 		Workspace returnedWorkspace = workspaceService.createWorkspace(workspaceDto);
 		assertEquals(workspaceDto.getName(), returnedWorkspace.getName(),
 				"Name value should transfer to new object");
-		assertEquals(workspaceDto.getStatus(), returnedWorkspace.getStatus(),
+		assertEquals(workspaceDto.getStatus().toString(), returnedWorkspace.getStatus().toString(),
 				"Status value should transfer to new object");
-		assertEquals(Optional.ofNullable(workspaceDto.getWorkspaceType()), returnedWorkspace.getWorkspaceType(),
+		assertEquals(Optional.ofNullable(workspaceDto.getWorkspaceType()), Optional.of(returnedWorkspace.getWorkspaceType()),
 				"Workspace Type value should transfer to new object");
 	}
 

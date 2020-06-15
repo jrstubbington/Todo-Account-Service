@@ -73,8 +73,8 @@ public class User implements Serializable {
 	private Set<Membership> memberships;
 
 	@Column
-	@CreatedDate
-	private OffsetDateTime dateCreated;
+	@CreatedDate //TODO: Add JPA auditing
+	private final OffsetDateTime dateCreated = OffsetDateTime.now();
 
 	@OneToOne(fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)

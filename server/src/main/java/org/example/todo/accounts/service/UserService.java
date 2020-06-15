@@ -5,15 +5,14 @@ import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.example.todo.accounts.dto.AccountCreationRequest;
-import org.example.todo.accounts.dto.JobProcessResponse;
-import org.example.todo.accounts.dto.LoginDto;
-import org.example.todo.accounts.dto.ResponseContainerUserDto;
-import org.example.todo.accounts.dto.ResponseContainerWorkspaceDto;
-import org.example.todo.accounts.dto.UserDto;
-import org.example.todo.accounts.dto.UserProfileDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;import org.example.todo.accounts.generated.dto.AccountCreationRequest;
+import org.example.todo.accounts.generated.dto.JobProcessResponse;
+import org.example.todo.accounts.generated.dto.LoginDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerUserDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
+import org.example.todo.accounts.generated.dto.UserDto;
+import org.example.todo.accounts.generated.dto.UserProfileDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.model.Login;
 import org.example.todo.accounts.model.Membership;
 import org.example.todo.accounts.model.User;
@@ -83,12 +82,12 @@ public class UserService {
 		return responseContainerUserDto;
 	}
 	@Transactional
-	public User findUserByUuid(UUID uuid) throws ResourceNotFoundException {
+	public User findUserByUuid(UUID uuid) {
 		return userRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %s", uuid)));
 	}
 
 	@Transactional
-	public ResponseContainerUserDto findUserByUuidResponse(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainerUserDto findUserByUuidResponse(UUID uuid){
 		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
 		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(findUserByUuid(uuid), UserDto.class));
 		return responseContainerUserDto;
@@ -96,7 +95,7 @@ public class UserService {
 
 	//TODO: Return an AccountCreationRequest here instead of a user
 	@Transactional
-	public User createUser(@Valid AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
+	public User createUser(@Valid AccountCreationRequest accountCreationRequest) {
 		@Valid UserDto userDto = accountCreationRequest.getUser();
 		@Valid WorkspaceDto workspaceDto = accountCreationRequest.getWorkspace();
 		@Valid LoginDto loginDto = accountCreationRequest.getLogin();
@@ -175,14 +174,14 @@ public class UserService {
 	}
 
 	@Transactional
-	public ResponseContainerUserDto createUserResponse(@Valid AccountCreationRequest accountCreationRequest) throws ImproperResourceSpecification, ResourceNotFoundException {
+	public ResponseContainerUserDto createUserResponse(@Valid AccountCreationRequest accountCreationRequest)  {
 		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
 		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(createUser(accountCreationRequest), UserDto.class));
 		return responseContainerUserDto;
 	}
 
 	@Transactional
-	public User updateUser(@Valid UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
+	public User updateUser(@Valid UserDto userUpdate){
 		if (Objects.nonNull(userUpdate.getUuid())) {
 			// User is being updated
 			log.debug("Updating User {}", userUpdate);
@@ -211,13 +210,13 @@ public class UserService {
 	}
 
 	@Transactional
-	public ResponseContainerUserDto updateUserResponse(@Valid UserDto userUpdate) throws ResourceNotFoundException, ImproperResourceSpecification {
+	public ResponseContainerUserDto updateUserResponse(@Valid UserDto userUpdate)  {
 		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
 		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(updateUser(userUpdate), UserDto.class));
 		return responseContainerUserDto;
 	}
 
-	public Set<User> getAllUsersInWorkspace(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+	public Set<User> getAllUsersInWorkspace(UUID uuid) {
 		if (Objects.nonNull(uuid)) {
 			//Attempt to find workspace or else throw from workspaceService
 			workspaceService.findWorkspaceByUuid(uuid);
@@ -228,7 +227,7 @@ public class UserService {
 		}
 	}
 
-	public ResponseContainerUserDto getAllUsersInWorkspaceResponse(UUID uuid) throws ImproperResourceSpecification, ResourceNotFoundException {
+	public ResponseContainerUserDto getAllUsersInWorkspaceResponse(UUID uuid) {
 		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
 		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(getAllUsersInWorkspace(uuid), UserDto.class));
 		return responseContainerUserDto;
@@ -236,14 +235,14 @@ public class UserService {
 
 
 	@Transactional(readOnly = true)
-	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) throws ResourceNotFoundException {
+	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) {
 		User user = findUserByUuid(uuid);
 		Set<Membership> memberships = user.getMemberships();
 		return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
 	}
 
 	@Transactional
-	public ResponseContainerWorkspaceDto getAllWorkspacesForUserUuidResponse(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainerWorkspaceDto getAllWorkspacesForUserUuidResponse(UUID uuid) {
 
 		List<WorkspaceDto> responseContainer = ResponseUtils.convertToDtoList(new ArrayList<>(getAllWorkspacesForUserUuid(uuid)), WorkspaceDto.class);
 		ResponseContainerWorkspaceDto responseContainerUserDto = new ResponseContainerWorkspaceDto();
@@ -253,7 +252,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public User deleteUser(UUID uuid) throws ResourceNotFoundException {
+	public User deleteUser(UUID uuid) {
 		User user = findUserByUuid(uuid);
 		user.setStatus(Status.DELETED);
 
@@ -273,7 +272,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public ResponseContainerUserDto deleteUserResponse(UUID uuid) throws ResourceNotFoundException {
+	public ResponseContainerUserDto deleteUserResponse(UUID uuid) {
 		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
 		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(deleteUser(uuid), UserDto.class));
 		return responseContainerUserDto;
@@ -304,7 +303,7 @@ public class UserService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public JobProcessResponse batchUpload(InputStream inputStream) throws ImproperResourceSpecification {
+	public JobProcessResponse batchUpload(InputStream inputStream) {
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			//File format is correct
 			log.trace("Uploaded file format is a valid Excel file");

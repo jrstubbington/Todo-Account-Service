@@ -1,10 +1,10 @@
 package org.example.todo.accounts.service;
 
-import org.example.todo.accounts.dto.AccountCreationRequest;
-import org.example.todo.accounts.dto.LoginDto;
-import org.example.todo.accounts.dto.UserDto;
-import org.example.todo.accounts.dto.UserProfileDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.example.todo.accounts.generated.dto.AccountCreationRequest;
+import org.example.todo.accounts.generated.dto.LoginDto;
+import org.example.todo.accounts.generated.dto.UserDto;
+import org.example.todo.accounts.generated.dto.UserProfileDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.model.Login;
 import org.example.todo.accounts.model.Membership;
 import org.example.todo.accounts.model.User;
@@ -236,7 +236,7 @@ class UserServiceTest {
 	@Test
 	void testCreateUserResponse() throws ImproperResourceSpecification, ResourceNotFoundException {
 		UserDto userDto = new UserDto();
-
+		userDto.setStatus(UserDto.StatusEnum.ACTIVE);
 		LoginDto loginDto = new LoginDto();
 		loginDto.setUsername("tstark");
 		loginDto.setPlainTextPassword("supersecretpassword");
@@ -284,6 +284,7 @@ class UserServiceTest {
 		//Generate input UserDto
 		UserDto userDto = new UserDto();
 		userDto.setUuid(user.getUuid());
+		userDto.setStatus(UserDto.StatusEnum.ACTIVE);
 
 		//Generate input UserDto UserProfile
 
@@ -323,6 +324,7 @@ class UserServiceTest {
 
 		UserDto userDto = new UserDto();
 		userDto.setUuid(UUID.randomUUID());
+		userDto.setStatus(UserDto.StatusEnum.ACTIVE);
 
 		//Generate input UserDto UserProfile
 		UserProfileDto updateProfile = new UserProfileDto();
@@ -368,6 +370,7 @@ class UserServiceTest {
 
 		WorkspaceDto workspaceDto = new WorkspaceDto();
 		workspaceDto.setUuid(workspace.getUuid());
+		workspaceDto.setWorkspaceType(0);
 
 		List<WorkspaceDto> workspaceList = new ArrayList<>(Collections.singletonList(workspaceDto));
 

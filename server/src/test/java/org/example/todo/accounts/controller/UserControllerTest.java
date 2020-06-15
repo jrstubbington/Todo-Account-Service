@@ -1,12 +1,13 @@
 package org.example.todo.accounts.controller;
-/*
-import org.example.todo.accounts.dto.AccountCreationRequest;
-import org.example.todo.accounts.dto.UserDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+
+import org.example.todo.accounts.generated.dto.AccountCreationRequest;
+import org.example.todo.accounts.generated.dto.ResponseContainerUserDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
+import org.example.todo.accounts.generated.dto.UserDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.service.UserService;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
-import org.example.todo.common.util.ResponseContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +42,11 @@ class UserControllerTest {
 	void testGetUsersV1() {
 		PageRequest pageRequest = PageRequest.of(0, 10);
 
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+//		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.getAllUsersResponse(pageRequest)).thenReturn(responseContainer);
 
@@ -54,8 +58,11 @@ class UserControllerTest {
 
 	@Test
 	void testGetUserByUUID() throws ResourceNotFoundException {
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+//		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new UserDto()));
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.findUserByUuidResponse(isA(UUID.class))).thenReturn(responseContainer);
 
@@ -68,8 +75,10 @@ class UserControllerTest {
 	@Test
 	void testUpdateUser() throws ResourceNotFoundException, ImproperResourceSpecification {
 		UserDto userDto = new UserDto();
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.updateUserResponse(isA(UserDto.class))).thenReturn(responseContainer);
 
@@ -88,8 +97,10 @@ class UserControllerTest {
 		accountCreationRequest.setUser(userDto);
 		accountCreationRequest.setWorkspace(workspaceDto);
 
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = ResponseEntity.ok(responseContainer);
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.createUserResponse(isA(AccountCreationRequest.class))).thenReturn(responseContainer);
 
@@ -101,8 +112,11 @@ class UserControllerTest {
 
 	@Test
 	void testGetUserWorkspaces() throws ResourceNotFoundException {
-		ResponseContainer<WorkspaceDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(new WorkspaceDto()));
-		ResponseEntity<ResponseContainer<WorkspaceDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+		ResponseContainerWorkspaceDto responseContainer = new ResponseContainerWorkspaceDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new WorkspaceDto()));
+		ResponseEntity<ResponseContainerWorkspaceDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+
 
 		when(userService.getAllWorkspacesForUserUuidResponse(isA(UUID.class))).thenReturn(responseContainer);
 
@@ -115,8 +129,10 @@ class UserControllerTest {
 	@Test
 	void testDeleteUser() throws ResourceNotFoundException {
 		UserDto userDto = new UserDto();
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
-		ResponseEntity<ResponseContainer<UserDto>> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.deleteUserResponse(isA(UUID.class))).thenReturn(responseContainer);
 
@@ -126,4 +142,4 @@ class UserControllerTest {
 				"Response should match expected format");
 
 	}
-}*/
+}

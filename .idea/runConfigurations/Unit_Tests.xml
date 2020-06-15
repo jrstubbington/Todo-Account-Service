@@ -43,17 +43,12 @@
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="org.example.todo.accounts.exception.ErrorDetails" />
+        <option name="PATTERN" value="org.example.todo.accounts.exceptions.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="org.example.todo.accounts.util.LoggingAspect" />
-        <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.example.todo.accounts.kafka.KafkaProducer" />
+        <option name="PATTERN" value="org.example.todo.accounts.generated.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
       </pattern>

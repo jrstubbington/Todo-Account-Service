@@ -1,14 +1,14 @@
-/*
 package org.example.todo.accounts.controller;
 
-import org.example.todo.accounts.dto.UserDto;
-import org.example.todo.accounts.dto.WorkspaceDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerUserDto;
+import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
+import org.example.todo.accounts.generated.dto.UserDto;
+import org.example.todo.accounts.generated.dto.WorkspaceDto;
 import org.example.todo.accounts.model.Workspace;
 import org.example.todo.accounts.service.UserService;
 import org.example.todo.accounts.service.WorkspaceService;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
-import org.example.todo.common.util.ResponseContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,9 +60,12 @@ class WorkspaceControllerTest {
 		Workspace workspace = new Workspace();
 		WorkspaceDto workspaceDto = new WorkspaceDto();
 		workspaceDto.setUuid(workspace.getUuid());
+		workspaceDto.setWorkspaceType(0);
 
-		ResponseContainer<WorkspaceDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(workspaceDto));
-		ResponseEntity<ResponseContainer<WorkspaceDto>> workspaceResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
+		ResponseContainerWorkspaceDto responseContainer = new ResponseContainerWorkspaceDto();
+//		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(workspaceDto));
+		ResponseEntity<ResponseContainerWorkspaceDto> workspaceResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(workspaceService.getAllWorkspaces(pageRequest)).thenReturn(workspacePage);
 		when(workspacePage.getContent()).thenReturn(Collections.singletonList(workspace));
@@ -82,7 +85,10 @@ class WorkspaceControllerTest {
 	void testGetUserWorkspaces() throws ImproperResourceSpecification, ResourceNotFoundException {
 		UserDto userDto = new UserDto();
 
-		ResponseContainer<UserDto> responseContainer = new ResponseContainer<>(true, null, Collections.singletonList(userDto));
+		ResponseContainerUserDto responseContainer = new ResponseContainerUserDto();
+		responseContainer.setSuccess(true);
+		responseContainer.setData(Collections.singletonList(new UserDto()));
+		ResponseEntity<ResponseContainerUserDto> userResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
 		when(userService.getAllUsersInWorkspaceResponse(isA(UUID.class))).thenReturn(responseContainer);
 		assertEquals(HttpStatus.OK, workspaceController.getUsersInWorkspace(UUID.randomUUID()).getStatusCode(),
@@ -93,4 +99,3 @@ class WorkspaceControllerTest {
 				"Controller should not throw exception when getting user workspaces");
 	}
 }
-*/

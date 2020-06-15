@@ -84,6 +84,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>target/generated-sources/openapi/openapi/</directory>
+                <includes>
+                    <include>openapi.yaml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!--
             * This plugin is used to handle the code generation with the configuration defined in openapi-generator-config.json
@@ -104,8 +112,8 @@
                             <inputSpec>${main.basedir}/api.yaml</inputSpec>
                             <!--                            <configurationFile>${project.basedir}/openapi-generator-config.json</configurationFile>-->
                             <!--                            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>-->
-                            <modelPackage>org.example.todo.accounts.dto</modelPackage>
-                            <apiPackage>org.example.todo.accounts.controller</apiPackage>
+                            <modelPackage>org.example.todo.accounts.generated.dto</modelPackage>
+                            <apiPackage>org.example.todo.accounts.generated.controller</apiPackage>
                             <invokerPackage>org.example</invokerPackage>
 
                             <generatorName>java</generatorName>
@@ -139,6 +147,41 @@
                                 <npmName>accountServiceApi</npmName>
                                 <supportsES6>true</supportsES6>
                             </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>openapi</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+
+                        <configuration>
+                            <inputSpec>${main.basedir}/api.yaml</inputSpec>
+                            <modelPackage>org.example.todo.accounts.generated.dto</modelPackage>
+                            <apiPackage>org.example.todo.accounts.generated.controller</apiPackage>
+                            <invokerPackage>org.example</invokerPackage>
+<!--                            <output>${project.basedir}/target/typescript/</output>-->
+                            <generatorName>openapi-yaml</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.redskap</groupId>
+                <artifactId>swagger-brake-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <newApi>${project.build.directory}/generated-sources/openapi/openapi/openapi.yaml</newApi>
+                            <mavenRepoUrl>http://nexus.trullingham.com/repository/trullingham-libs/</mavenRepoUrl>
+                            <apiFilename>openapi.yaml</apiFilename>
                         </configuration>
                     </execution>
                 </executions>

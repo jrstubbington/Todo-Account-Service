@@ -33,6 +33,7 @@
 
     <properties>
         <main.basedir>${project.basedir}</main.basedir>
+        <revision>1.0-SNAPSHOT</revision>
     </properties>
 
     <groupId>org.example</groupId>
