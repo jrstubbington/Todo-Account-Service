@@ -63,17 +63,10 @@ class WorkspaceControllerTest {
 		workspaceDto.setWorkspaceType(0);
 
 		ResponseContainerWorkspaceDto responseContainer = new ResponseContainerWorkspaceDto();
-//		responseContainer.setSuccess(true);
 		responseContainer.setData(Collections.singletonList(workspaceDto));
 		ResponseEntity<ResponseContainerWorkspaceDto> workspaceResponse = new ResponseEntity<>(responseContainer, HttpStatus.OK);
 
-		when(workspaceService.getAllWorkspaces(pageRequest)).thenReturn(workspacePage);
-		when(workspacePage.getContent()).thenReturn(Collections.singletonList(workspace));
-		when(workspacePage.getPageable()).thenReturn(pageable);
-		when(workspacePage.getTotalPages()).thenReturn(1);
-		when(workspacePage.getTotalElements()).thenReturn(1L);
-		when(workspacePage.isLast()).thenReturn(true);
-		when(pageable.getPageNumber()).thenReturn(0);
+		when(workspaceService.getAllWorkspacesResponse(pageRequest)).thenReturn(responseContainer);
 
 		assertEquals(HttpStatus.OK, workspaceController.getWorkspacesV1(0, 10).getStatusCode(),
 				"Status code should be OK (200)");

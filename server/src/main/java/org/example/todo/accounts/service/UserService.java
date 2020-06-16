@@ -5,7 +5,8 @@ import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;import org.example.todo.accounts.generated.dto.AccountCreationRequest;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.todo.accounts.generated.dto.AccountCreationRequest;
 import org.example.todo.accounts.generated.dto.JobProcessResponse;
 import org.example.todo.accounts.generated.dto.LoginDto;
 import org.example.todo.accounts.generated.dto.ResponseContainerUserDto;
@@ -24,7 +25,6 @@ import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.common.kafka.KafkaOperation;
 import org.example.todo.common.kafka.KafkaProducer;
-import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.ResponseUtils;
 import org.example.todo.common.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,6 @@ public class UserService {
 
 	private KafkaProducer<UserDto> kafkaProducer;
 
-
 	@Autowired
 	private SpringValidatorAdapter validator;
 
@@ -76,10 +75,7 @@ public class UserService {
 	//TODO: Enable filtering and sorting
 	@Transactional
 	public ResponseContainerUserDto getAllUsersResponse(PageRequest pageRequest) {
-		ResponseContainer<UserDto> responseContainer = ResponseUtils.pageToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class);
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.data(responseContainer.getData());
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(userRepository.findAll(pageRequest), UserDto.class, ResponseContainerUserDto.class);
 	}
 	@Transactional
 	public User findUserByUuid(UUID uuid) {
@@ -88,9 +84,7 @@ public class UserService {
 
 	@Transactional
 	public ResponseContainerUserDto findUserByUuidResponse(UUID uuid){
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(findUserByUuid(uuid), UserDto.class));
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(findUserByUuid(uuid), UserDto.class, ResponseContainerUserDto.class);
 	}
 
 	//TODO: Return an AccountCreationRequest here instead of a user
@@ -175,9 +169,7 @@ public class UserService {
 
 	@Transactional
 	public ResponseContainerUserDto createUserResponse(@Valid AccountCreationRequest accountCreationRequest)  {
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(createUser(accountCreationRequest), UserDto.class));
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(createUser(accountCreationRequest), UserDto.class, ResponseContainerUserDto.class);
 	}
 
 	@Transactional
@@ -211,11 +203,10 @@ public class UserService {
 
 	@Transactional
 	public ResponseContainerUserDto updateUserResponse(@Valid UserDto userUpdate)  {
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(updateUser(userUpdate), UserDto.class));
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(updateUser(userUpdate), UserDto.class, ResponseContainerUserDto.class);
 	}
 
+	@Transactional
 	public Set<User> getAllUsersInWorkspace(UUID uuid) {
 		if (Objects.nonNull(uuid)) {
 			//Attempt to find workspace or else throw from workspaceService
@@ -227,10 +218,9 @@ public class UserService {
 		}
 	}
 
+	@Transactional
 	public ResponseContainerUserDto getAllUsersInWorkspaceResponse(UUID uuid) {
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(getAllUsersInWorkspace(uuid), UserDto.class));
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(new ArrayList<>(getAllUsersInWorkspace(uuid)), UserDto.class, ResponseContainerUserDto.class);
 	}
 
 
@@ -243,11 +233,7 @@ public class UserService {
 
 	@Transactional
 	public ResponseContainerWorkspaceDto getAllWorkspacesForUserUuidResponse(UUID uuid) {
-
-		List<WorkspaceDto> responseContainer = ResponseUtils.convertToDtoList(new ArrayList<>(getAllWorkspacesForUserUuid(uuid)), WorkspaceDto.class);
-		ResponseContainerWorkspaceDto responseContainerUserDto = new ResponseContainerWorkspaceDto();
-		responseContainerUserDto.data(responseContainer);
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(new ArrayList<>(getAllWorkspacesForUserUuid(uuid)), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
 
 	}
 
@@ -273,9 +259,7 @@ public class UserService {
 
 	@Transactional
 	public ResponseContainerUserDto deleteUserResponse(UUID uuid) {
-		ResponseContainerUserDto responseContainerUserDto = new ResponseContainerUserDto();
-		responseContainerUserDto.addDataItem(ResponseUtils.convertToDto(deleteUser(uuid), UserDto.class));
-		return responseContainerUserDto;
+		return ResponseUtils.convertToDtoResponseContainer(deleteUser(uuid), UserDto.class, ResponseContainerUserDto.class);
 	}
 
 	@Autowired

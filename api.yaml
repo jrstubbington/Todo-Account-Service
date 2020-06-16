@@ -406,6 +406,7 @@ components:
       properties:
         success:
           type: boolean
+          default: true
         statusDescription:
           type: string
         totalElements:
@@ -414,14 +415,18 @@ components:
         totalPages:
           type: integer
           format: int64
+          default: 1
         pageSize:
           type: integer
           format: int64
+          default: 10
         page:
           type: integer
           format: int64
+          default: 0
         last:
           type: boolean
+          default: true
         size:
           type: integer
           format: int32
@@ -463,6 +468,7 @@ components:
       properties:
         success:
           type: boolean
+          default: true
         statusDescription:
           type: string
         totalElements:
@@ -471,14 +477,18 @@ components:
         totalPages:
           type: integer
           format: int64
+          default: 1
         pageSize:
           type: integer
           format: int64
+          default: 10
         page:
           type: integer
           format: int64
+          default: 0
         last:
           type: boolean
+          default: true
         size:
           type: integer
           format: int32

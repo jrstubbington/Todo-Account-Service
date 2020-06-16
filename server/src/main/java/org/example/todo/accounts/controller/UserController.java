@@ -34,8 +34,8 @@ public class UserController implements UserManagementApi {
 
 	private UserService userService;
 
-//	@Autowired //TODO: autowire setter
-//	private StorageService storageService;
+/*	@Autowired //TODO: autowire setter in method
+	private StorageService storageService;*/
 
 	@Override
 	public ResponseEntity<ResponseContainerUserDto> createUser(@Valid AccountCreationRequest accountCreationRequest) {

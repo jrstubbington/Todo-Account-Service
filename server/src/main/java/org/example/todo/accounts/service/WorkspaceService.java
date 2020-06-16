@@ -9,7 +9,6 @@ import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
 import org.example.todo.common.kafka.KafkaOperation;
 import org.example.todo.common.kafka.KafkaProducer;
-import org.example.todo.common.util.ResponseContainer;
 import org.example.todo.common.util.ResponseUtils;
 import org.example.todo.common.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,15 +37,18 @@ public class WorkspaceService {
 	}
 
 	@Transactional
+	public ResponseContainerWorkspaceDto getAllWorkspacesResponse(PageRequest pageRequest) {
+		return ResponseUtils.convertToDtoResponseContainer(getAllWorkspaces(pageRequest), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
+	}
+
+	@Transactional
 	public Workspace findWorkspaceByUuid(UUID uuid) {
 		return workspaceRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(String.format("Workspace not found with id: %s", uuid)));
 	}
 
 	@Transactional
 	public ResponseContainerWorkspaceDto findWorkspaceByUuidResponse(UUID uuid) {
-		ResponseContainerWorkspaceDto responseContainerWorkspaceDto = new ResponseContainerWorkspaceDto();
-		responseContainerWorkspaceDto.addDataItem(ResponseUtils.convertToDto(findWorkspaceByUuid(uuid), WorkspaceDto.class));
-		return responseContainerWorkspaceDto;
+		return ResponseUtils.convertToDtoResponseContainer(findWorkspaceByUuid(uuid), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
 
 	}
 
@@ -72,8 +73,8 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public ResponseContainer<WorkspaceDto> createWorkspaceResponse(@Valid WorkspaceDto workspaceDto) {
-		return ResponseUtils.pageToDtoResponseContainer(Collections.singletonList(createWorkspace(workspaceDto)), WorkspaceDto.class);
+	public ResponseContainerWorkspaceDto createWorkspaceResponse(@Valid WorkspaceDto workspaceDto) {
+		return ResponseUtils.convertToDtoResponseContainer(createWorkspace(workspaceDto), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
 	}
 
 	@Autowired
