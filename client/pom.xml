@@ -114,7 +114,7 @@
                             <!--                            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>-->
                             <modelPackage>org.example.todo.accounts.generated.dto</modelPackage>
                             <apiPackage>org.example.todo.accounts.generated.controller</apiPackage>
-                            <invokerPackage>org.example</invokerPackage>
+                            <invokerPackage>org.example.todo.accounts</invokerPackage>
 
                             <generatorName>java</generatorName>
                             <configOptions>
@@ -136,9 +136,9 @@
 
                         <configuration>
                             <inputSpec>${main.basedir}/api.yaml</inputSpec>
-                            <modelPackage>org.example.todo.accounts.dto</modelPackage>
-                            <apiPackage>org.example.todo.accounts.controller</apiPackage>
-                            <invokerPackage>org.example</invokerPackage>
+                            <modelPackage>org.example.todo.accounts.generated.dto</modelPackage>
+                            <apiPackage>org.example.todo.accounts.generated.controller</apiPackage>
+                            <invokerPackage>org.example.todo.accounts</invokerPackage>
                             <output>${project.basedir}/target/typescript/</output>
                             <generatorName>typescript-fetch</generatorName>
                             <generateApiTests>false</generateApiTests>
