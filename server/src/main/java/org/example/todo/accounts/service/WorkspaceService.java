@@ -53,7 +53,7 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public Workspace createWorkspace(@Valid WorkspaceDto workspaceDto) {
+	public Workspace createWorkspace(UUID userUuid, @Valid WorkspaceDto workspaceDto) {
 		if (Objects.isNull(workspaceDto.getUuid())) {
 			Workspace workspace = Workspace.builder()
 					.name(workspaceDto.getName())
@@ -73,8 +73,8 @@ public class WorkspaceService {
 	}
 
 	@Transactional
-	public ResponseContainerWorkspaceDto createWorkspaceResponse(@Valid WorkspaceDto workspaceDto) {
-		return ResponseUtils.convertToDtoResponseContainer(createWorkspace(workspaceDto), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
+	public ResponseContainerWorkspaceDto createWorkspaceResponse(UUID userUuid, @Valid WorkspaceDto workspaceDto) {
+		return ResponseUtils.convertToDtoResponseContainer(createWorkspace(userUuid, workspaceDto), WorkspaceDto.class, ResponseContainerWorkspaceDto.class);
 	}
 
 	@Autowired

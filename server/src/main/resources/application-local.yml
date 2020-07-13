@@ -3,3 +3,14 @@ server:
 
 logging:
   config: classpath:log4j2.xml
+
+keycloak:
+  auth-server-url: http://keycloak.trullingham.com/auth
+  realm: TodoProject
+  resource: ${AUTH_CLIENT_ID}
+  credentials:
+    secret: ${AUTH_CLIENT_SECRET}
+  public-client: false
+  ssl-required: external
+  use-resource-role-mappings: true
+  bearer-only: true

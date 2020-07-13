@@ -28,6 +28,7 @@ public class Membership implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	//TODO: Convert to user UUID as users will be moved out of this application
 	@ManyToOne
 	@JoinColumn(name = "user_uuid", referencedColumnName = "uuid")
 	@ToString.Exclude
