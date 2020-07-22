@@ -65,7 +65,7 @@ public class User implements Serializable {
 	@EqualsAndHashCode.Exclude
 	private UserProfile userProfile;
 
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = "userUuid", fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL)
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude

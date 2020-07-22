@@ -111,7 +111,7 @@ class WorkspaceServiceTest {
 
 		when(workspaceRepository.saveAndFlush(isA(Workspace.class))).thenReturn(workspace);
 
-		Workspace returnedWorkspace = workspaceService.createWorkspace(workspaceDto);
+		Workspace returnedWorkspace = workspaceService.createWorkspace(UUID.randomUUID(), workspaceDto);
 		assertEquals(workspaceDto.getName(), returnedWorkspace.getName(),
 				"Name value should transfer to new object");
 		assertEquals(workspaceDto.getStatus().toString(), returnedWorkspace.getStatus().toString(),
@@ -129,7 +129,7 @@ class WorkspaceServiceTest {
 		workspaceDto.setStatus(WorkspaceDto.StatusEnum.ACTIVE);
 		workspaceDto.setWorkspaceType(1);
 
-		assertThrows(ImproperResourceSpecification.class, () -> workspaceService.createWorkspace(workspaceDto),
+		assertThrows(ImproperResourceSpecification.class, () -> workspaceService.createWorkspace(UUID.randomUUID(), workspaceDto),
 				"An ImproperResourceSpecification should be thrown when specifying a UUID creating a new workspace");
 	}
 
@@ -147,8 +147,8 @@ class WorkspaceServiceTest {
 
 		when(workspaceRepository.saveAndFlush(isA(Workspace.class))).thenReturn(workspace);
 
-		assertNotNull(workspaceService.createWorkspaceResponse(workspaceDto).getData().get(0), "Returned user profile should match passed in object");
-		Assertions.assertDoesNotThrow(() -> workspaceService.createWorkspaceResponse(workspaceDto),
+		assertNotNull(workspaceService.createWorkspaceResponse(UUID.randomUUID(), workspaceDto).getData().get(0), "Returned user profile should match passed in object");
+		Assertions.assertDoesNotThrow(() -> workspaceService.createWorkspaceResponse(UUID.randomUUID(), workspaceDto),
 				"Creating a user when specifying all necessary parameters should not throw an exception");
 	}
 }

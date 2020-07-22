@@ -10,4 +10,6 @@ import java.util.UUID;
 @SuppressWarnings("squid:S00100")
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 	List<Membership> findAllByWorkspace_uuid(UUID uuid);
+	List<Membership> findAllByUserUuid(UUID uuid);
+	List<Membership> findAllByUserUuidAndWorkspace_uuid(UUID userUuid, UUID workspaceUuid);
 }

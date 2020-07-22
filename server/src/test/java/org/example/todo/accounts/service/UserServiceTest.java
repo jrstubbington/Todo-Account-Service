@@ -270,7 +270,7 @@ class UserServiceTest {
 
 		workspace = Workspace.builder().name("Workspace").status(Status.ACTIVE).memberships(new HashSet<>()).build();
 
-		when(workspaceService.createWorkspace(isA(WorkspaceDto.class))).thenReturn(workspace);
+		when(workspaceService.createWorkspace(isA(UUID.class), isA(WorkspaceDto.class))).thenReturn(workspace);
 		when(userRepository.saveAndFlush(isA(User.class))).thenReturn(user);
 
 		assertEquals(updateProfile, userService.createUserResponse(accountCreationRequest).getData().get(0).getUserProfile(),

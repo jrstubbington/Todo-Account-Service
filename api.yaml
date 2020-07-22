@@ -420,7 +420,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorDetails'
 
+
+security:
+#  - OpenID:
+#      - user
+#      - admin
+  - OAuth:
+      - user
+      - admin
+
+#
+#
+#
+#
+#
+
+
 components:
+  securitySchemes:
+#    OpenID:
+#      type: openIdConnect
+#      openIdConnectUrl: http://keycloak.trullingham.com/auth/realms/TodoProject/.well-known/openid-configuration
+    OAuth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://keycloak.trullingham.com/auth/realms/TodoProject/protocol/openid-connect/auth
+          scopes: {}
   schemas:
     ErrorDetails:
       type: object

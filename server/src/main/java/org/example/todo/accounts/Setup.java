@@ -95,13 +95,13 @@ public class Setup {
 				Set<Membership> memberships = new HashSet<>(Arrays.asList(membership, membership1));
 
 				workspace.setMemberships(memberships);
-				user.setMemberships(memberships);
+//				user.setMemberships(memberships);
 				user.setLogin(login);
 				user.setUserProfile(userProfile);
 
 				for (Membership memship : memberships) {
 					memship.setWorkspace(workspace);
-					memship.setUser(user);
+//					memship.setUser(user);
 				}
 
 				Workspace testingObject = workspaceRepository.save(workspace);

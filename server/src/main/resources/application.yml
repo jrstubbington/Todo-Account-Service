@@ -1,6 +1,7 @@
 spring:
   main:
     banner-mode: off
+#    allow-bean-definition-overriding: true
   jackson:
     serialization:
       fail-on-empty-beans: false
@@ -92,13 +93,14 @@ kafka:
 logging:
   config: classpath:log4j2.xml
   level:
-    root: WARN
+    root: ERROR
     org:
       example: DEBUG
       apache:
         catalina: WARN
         coyote: WARN
       springframework: WARN
+      springframework.security: ERROR
 
 project:
   package: ^project.groupId^

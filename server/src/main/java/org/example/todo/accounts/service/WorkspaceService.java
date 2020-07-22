@@ -3,7 +3,9 @@ package org.example.todo.accounts.service;
 import lombok.extern.slf4j.Slf4j;
 import org.example.todo.accounts.generated.dto.ResponseContainerWorkspaceDto;
 import org.example.todo.accounts.generated.dto.WorkspaceDto;
+import org.example.todo.accounts.model.Membership;
 import org.example.todo.accounts.model.Workspace;
+import org.example.todo.accounts.repository.MembershipRepository;
 import org.example.todo.accounts.repository.WorkspaceRepository;
 import org.example.todo.common.exceptions.ImproperResourceSpecification;
 import org.example.todo.common.exceptions.ResourceNotFoundException;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,6 +33,8 @@ public class WorkspaceService {
 	private KafkaProducer<WorkspaceDto> kafkaProducer;
 
 	private WorkspaceRepository workspaceRepository;
+
+	private MembershipRepository membershipRepository;
 
 	public Page<Workspace> getAllWorkspaces(PageRequest pageRequest) {
 		return workspaceRepository.findAll(pageRequest);
@@ -55,13 +59,30 @@ public class WorkspaceService {
 	@Transactional
 	public Workspace createWorkspace(UUID userUuid, @Valid WorkspaceDto workspaceDto) {
 		if (Objects.isNull(workspaceDto.getUuid())) {
+
+//			resourceRepresentation.
+
+			Membership membership = Membership.builder()
+					.userUuid(userUuid)
+					.roleId(3L)
+					.build();
+
+
 			Workspace workspace = Workspace.builder()
 					.name(workspaceDto.getName())
 					.status(Status.valueOf(workspaceDto.getStatus().toString()))
 					.workspaceType(1) //TODO: change workspaceTypes to mean something
-					.memberships(new HashSet<>())
+					.memberships(Collections.singleton(membership))
 					.build();
+
+			membership.setWorkspace(workspace);
+
 			Workspace savedWorkspace = workspaceRepository.saveAndFlush(workspace);
+			membershipRepository.save(membership);
+
+
+
+
 			kafkaProducer.sendMessage(KAFKA_TOPIC, KafkaOperation.CREATE,
 					ResponseUtils.convertToDto(savedWorkspace, WorkspaceDto.class));
 			return savedWorkspace;
@@ -85,5 +106,10 @@ public class WorkspaceService {
 	@Autowired
 	public void setKafkaProducer(KafkaProducer<WorkspaceDto> kafkaProducer) {
 		this.kafkaProducer = kafkaProducer;
+	}
+
+	@Autowired
+	public void setMembershipRepository(MembershipRepository membershipRepository) {
+		this.membershipRepository = membershipRepository;
 	}
 }

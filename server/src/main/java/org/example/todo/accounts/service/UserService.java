@@ -133,7 +133,7 @@ public class UserService {
 		Workspace workspace;
 		if (Objects.isNull(workspaceDto.getUuid())) {
 			//User is being added to a new Workspace, need to create that workspace
-			workspace = workspaceService.createWorkspace(workspaceDto);
+			workspace = workspaceService.createWorkspace(userDto.getUuid(), workspaceDto);
 		}
 		else {
 			//User is being added to an already existing Workspace, get that workspace
@@ -150,8 +150,9 @@ public class UserService {
 		//Get current User memberships and add new one, if any
 		Set<Membership> userMemberships = user.getMemberships();
 		userMemberships.add(membership);
-		user.setMemberships(userMemberships);
-		membership.setUser(user);
+//		user.setMemberships(userMemberships);
+//		membership.setUser(user);
+//		membership.setUserUuid(user.getUuid());
 
 		//Get current Workspace memberships and add new one, if any
 		Set<Membership> workspaceMemberships = workspace.getMemberships();
@@ -226,8 +227,9 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public Set<Workspace> getAllWorkspacesForUserUuid(UUID uuid) {
-		User user = findUserByUuid(uuid);
-		Set<Membership> memberships = user.getMemberships();
+//		User user = findUserByUuid(uuid);
+//		Set<Membership> memberships = user.getMemberships();
+		List<Membership> memberships = membershipRepository.findAllByUserUuid(uuid);
 		return memberships.stream().map(Membership::getWorkspace).collect(Collectors.toSet());
 	}
 
